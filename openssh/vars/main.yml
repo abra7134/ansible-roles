@@ -1,0 +1,14 @@
+---
+# The 'ssh' version to be installed
+_ssh_version: >-
+  {{ [ansible_facts.distribution_release | mandatory]
+     | map(
+         'extract',
+         {
+           'jessie': '6.7p1',
+           'stretch': '7.4p1',
+           'buster': '7.9p1'
+         }
+       )
+     | first
+  }}

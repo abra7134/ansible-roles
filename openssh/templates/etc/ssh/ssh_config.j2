@@ -1,0 +1,5 @@
+{{ ansible_managed | comment }}
+
+{% from ".macros.j2" import ssh_write_config with context -%}
+
+{{ ssh_write_config(openssh_ssh_config) }}

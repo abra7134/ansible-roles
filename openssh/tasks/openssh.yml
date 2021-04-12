@@ -1,0 +1,55 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    openssh_sshd_config is not mapping    or
+    openssh_ssh_config is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Pin the actual version
+  copy:
+    content: |
+      Package: ssh
+      Pin: version {{ _ssh_version }}-*
+      Pin-Priority: 1001
+    dest: /etc/apt/preferences.d/00ssh
+    mode: 0644
+
+- name: Install packages
+  apt:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - openssh-client
+    - openssh-server
+
+- name: Write daemon configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0644
+    validate: /usr/sbin/sshd -t -f %s
+  loop:
+    - /etc/ssh/sshd_config
+  notify:
+    - Reload 'ssh' service
+  tags:
+    - openssh_config
+
+- name: Write client configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0644
+  loop:
+    - /etc/ssh/ssh_config
+  tags:
+    - openssh_config
+
+- meta: flush_handlers

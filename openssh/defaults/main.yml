@@ -1,0 +1,25 @@
+---
+# The dictionary with main configuration of ssh daemon
+openssh_sshd_config:
+  # the Debian openssh-server package sets several options as standard in /etc/ssh/sshd_config which are
+  # not the default in sshd(8). The exact list depends on whether the package was installed fresh or upgraded from
+  # various possible previous versions, but includes at least the following:
+
+  ChallengeResponseAuthentication: no
+  X11Forwarding: yes
+  PrintMotd: no
+  AcceptEnv:
+    - LANG LC_*
+  Subsystem:
+    - sftp /usr/lib/openssh/sftp-server
+  UsePAM: yes
+
+# The dictionary with main configuration of ssh client
+openssh_ssh_config:
+  # Note that the Debian openssh-client package sets several options as standard in /etc/ssh/ssh_config which are
+  # not the default in ssh(1):
+
+  SendEnv:
+    - LANG LC_*
+  HashKnownHosts: yes
+  GSSAPIAuthentication: yes

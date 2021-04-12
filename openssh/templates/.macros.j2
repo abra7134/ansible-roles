@@ -1,0 +1,26 @@
+{% macro ssh_write_params(params, indent=0) %}
+{% for param, values in params.items() %}
+{% if values is not mapping and values != None %}
+{% if values is sequence and values is not string %}
+{% for value in values %}
+{{ param | indent(width=indent, indentfirst=true) }} {{ value }}
+{% endfor %}
+{% else %}
+{{ param | indent(width=indent, indentfirst=true) }} {{ values | ternary("yes", "no") if values in [True, False] else values }}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endmacro %}
+
+{% macro ssh_write_config(config) %}
+{{ ssh_write_params(config, indent=0) }}
+{% for section in "Match", "Host" %}
+{% set section_params = config[section] %}
+{% if section_params is defined and section_params is mapping %}
+{% for match_criteria, match_params in section_params.iteritems() %}
+{{ section }} {{ match_criteria }}
+{{ ssh_write_params(match_params, indent=2) }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endmacro %}
