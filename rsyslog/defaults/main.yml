@@ -1,0 +1,5 @@
+---
+# The default Rsyslog configuration in RainerScript format
+rsyslog_config:
+  - module: [load: imuxsock]
+  - module: [load: imklog]

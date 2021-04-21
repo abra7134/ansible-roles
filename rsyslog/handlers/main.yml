@@ -1,0 +1,10 @@
+---
+- name: Restart 'rsyslog' service
+  service:
+    name: rsyslog
+    state: restarted
+
+- name: Remove '/etc/rsyslog.conf.dpkg-dist' file
+  file:
+    path: /etc/rsyslog.conf.dpkg-dist
+    state: absent

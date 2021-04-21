@@ -1,0 +1,14 @@
+---
+# The 'rsyslog' version to be installed
+_rsyslog_version: >-
+  {{ [ansible_facts.distribution_release | mandatory]
+     | map(
+         'extract',
+         {
+           'jessie': '8.4.2',
+           'stretch': '8.24',
+           'buster': '8.1901'
+         }
+       )
+     | first
+  }}

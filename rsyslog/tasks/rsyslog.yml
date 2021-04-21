@@ -1,0 +1,43 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    rsyslog_config is not sequence  or
+    rsyslog_config is string
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Pin the actual version
+  copy:
+    content: |
+      Package: rsyslog*
+      Pin: version {{ _rsyslog_version }}-*
+      Pin-Priority: 1001
+    dest: /etc/apt/preferences.d/00rsyslog
+
+# Write the configuration file first to prevent starting rsyslog with default configuration
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+  loop:
+    - /etc/rsyslog.conf
+  notify:
+    - Restart 'rsyslog' service
+  tags: rsyslog_config
+
+- name: Install packages
+  apt:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - rsyslog-relp
+  notify:
+    - Remove '/etc/rsyslog.conf.dpkg-dist' file
+
+- meta: flush_handlers

@@ -1,0 +1,39 @@
+{% macro write_rsyslog_expressions(expressions) %}
+{% if expressions is string %}
+{{ expressions }};
+{% elif expressions is sequence %}
+{% for expression in expressions %}
+{% if expression is mapping %}
+{% for param, values in expression.items() %}
+{% if param.startswith("if ") or param.startswith("else if ") %}
+{{ param }} then {
+{{ write_rsyslog_expressions(values) | indent(2, first=true) -}}
+}
+{% elif param == 'else' %}
+else {
+{{ write_rsyslog_expressions(values) | indent(2, first=true) -}}
+}
+{% elif values is string %}
+{{ param }}({{ values }})
+{% elif values is sequence %}
+{% set values_count=values | count %}
+{{ "\n" if values_count > 1 else "" }}{{ param }}(
+{%- for value in values %}
+{% if value is mapping %}
+{% for subparam, subvalue in value.items() %}
+{{ "\n  " if values_count > 1 else "" -}}
+{{ subparam }}="{{ subvalue | ternary('on', 'no') if subvalue in [True, False] else subvalue }}"
+{%- endfor %}
+{% endif %}
+{% endfor %}
+{{ "\n)" if values_count > 1 else ")" }}
+{% endif %}
+{% endfor %}
+{% elif expression is string %}
+{{ expression }};
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endmacro %}
+
+{{- write_rsyslog_expressions(rsyslog_config) }}
