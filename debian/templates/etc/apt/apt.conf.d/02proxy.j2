@@ -1,0 +1,4 @@
+{{ ansible_managed | comment }}
+
+Acquire::http::proxy "{{ debian_apt_http_proxy | default('DIRECT') }}";
+Acquire::https::proxy "{{ debian_apt_https_proxy | default('DIRECT') }}";

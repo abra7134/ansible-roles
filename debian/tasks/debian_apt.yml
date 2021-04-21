@@ -1,0 +1,26 @@
+---
+- name: Write APT's configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0644
+  loop:
+    - /etc/apt/sources.list
+    - /etc/apt/apt.conf.d/02proxy
+  register:
+    __debian_apt_configuration
+
+- name: Update APT's cache and packages
+  apt:
+    autoremove: yes
+    cache_valid_time: 86400 # 1 day
+    purge: yes
+    update_cache: yes
+    upgrade: full
+  when:
+    - __debian_apt_configuration is changed
+
+- name: Install additional packages
+  apt:
+    name: "{{ debian_packages }}"
+    state: latest

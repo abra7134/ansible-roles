@@ -1,0 +1,22 @@
+---
+- name: Set hostname
+  hostname:
+    name: "{{ inventory_hostname }}"
+  tags:
+    - debian_network_hostname
+
+- name: Write network configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0644
+  loop:
+    - /etc/network/interfaces
+    - /etc/hosts
+  notify:
+    - Restart 'loopback' network interface
+    - Restart 'networking' service
+  tags:
+    - debian_network_config
+
+- meta: flush_handlers

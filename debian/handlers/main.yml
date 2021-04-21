@@ -1,0 +1,16 @@
+---
+- name: Move journal to '/var/log/journal'
+  command: >-
+    systemctl
+    kill
+    --signal=SIGUSR1
+    systemd-journald.service
+
+- name: Restart 'loopback' network interface
+  command: >-
+    ifup --force lo
+
+- name: Restart 'networking' service
+  service:
+    name: networking
+    state: restarted

@@ -1,0 +1,45 @@
+---
+# Use the specified address of proxy (or 'DIRECT' keyword) for using with APT's scripts
+debian_apt_http_proxy: DIRECT
+debian_apt_https_proxy: DIRECT
+
+# The of DNS-servers to be used for resolving IP-addresses
+debian_network_dns_servers:
+  - 8.8.8.8
+  - 77.88.8.8
+
+# The dictionary with additional records for host resolving
+debian_network_hosts: {}
+#  192.168.1.1:
+#    - hostname1
+#    - hostname2
+
+# The network interfaces configuration
+debian_network_interfaces: {}
+#  eth0:
+#    address: 192.168.1.2
+#    netmask: 255.255.255.0
+#    gateway: 192.168.1.1
+#    mac: FF:FF:FF:FF:FF:FF # Optional
+#    routes: []             # The list with additional routes in 'ip route' format
+#      - 192.168.0.0/24 via 192.168.1.250
+#    address6: a000:1234::1
+#    netmask6: 64
+#    gateway6: fe80::1
+#    bridge-ports: eth1
+#    bridge-stp: off
+#    bridge-fd: 0
+
+# The list of additional packages to be installed
+debian_packages: []
+
+# Use persistent storage for systemd's journal
+debian_systemd_journal_persistent: yes
+
+# The dictionary with system users definitions
+debian_users: {}
+#  user1:
+#    groups: wheel,audio
+#    password: in_hash_format from /etc/passwd file
+#    comment: It's a human :)
+#    shell: /bin/bash

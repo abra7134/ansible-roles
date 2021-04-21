@@ -1,0 +1,54 @@
+{{ ansible_managed | comment }}
+{% macro bridge_ports(iface_params) %}
+{% if iface_params['bridge-ports'] is defined and iface_params['bridge-ports'] != None and iface_params['bridge-ports'] != "" %}
+       bridge-ports {{ iface_params['bridge-ports'] }}
+       bridge-stp {{ iface_params['bridge-stp'] | default('off') }}
+       bridge-fd {{ iface_params['bridge-fd'] | default(0) }}
+{% endif %}
+{% endmacro %}
+
+auto lo
+iface lo inet loopback
+{% for dns_server in debian_network_dns_servers %}
+    dns-nameserver {{ dns_server }}
+{% endfor %}
+
+{% for iface_name, iface_params in debian_network_interfaces.items() %}
+{% if iface_params['address'] is defined or iface_params['address6'] is defined %}
+auto {{ iface_name }}
+iface {{ iface_name }} inet static
+       address {{ iface_params['address'] }}
+       netmask {{ iface_params['netmask'] | default('255.255.255.0') }}
+{% if iface_params['gateway'] is defined and iface_params['gateway'] != None and iface_params['gateway'] != "" %}
+       gateway {{ iface_params['gateway'] }}
+{% endif %}
+{% if iface_params['mac'] is defined and iface_params['mac'] != None and iface_params['mac'] != "" %}
+       hwaddress {{ iface_params['mac'] }}
+{% endif %}
+{{ bridge_ports(iface_params) }}
+{% if iface_params['routes'] is defined and iface_params['routes'] is sequence and iface_params['routes'] is not string %}
+{% for iface_route in iface_params['routes'] %}
+{% if iface_route != None and iface_route != "" %}
+
+       post-up ip route add {{ iface_route }} dev {{ iface_name }}
+       pre-down ip route del {{ iface_route }} dev {{ iface_name }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if iface_params['address6'] is defined %}
+
+iface {{ iface_name }} inet6 static
+       address {{ iface_params['address6'] }}
+       netmask {{ iface_params['netmask6'] | default(64) }}
+{% if iface_params['gateway6'] is defined and iface_params['gateway6'] != None and iface_params['gateway6'] != "" %}
+       gateway {{ iface_params['gateway6'] }}
+{% endif %}
+{% endif %}
+{% else %}
+{% if iface_params['bridge-ports'] is defined and iface_params['bridge-ports'] != None and iface_params['bridge-ports'] != "" %}
+auto {{ iface_name }}
+{% endif %}
+iface {{ iface_name }} inet manual
+{{ bridge_ports(iface_params) }}
+{% endif %}
+{% endfor %}

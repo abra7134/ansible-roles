@@ -1,0 +1,9 @@
+{{ ansible_managed | comment }}
+
+# From https://wiki.debian.org/ru/SourcesList
+deb http://mirror.yandex.ru/debian {{ ansible_facts.distribution_release | mandatory }} main
+deb http://mirror.yandex.ru/debian {{ ansible_facts.distribution_release | mandatory }}-updates main
+#
+# For security updates
+deb http://security.debian.org/ {{ ansible_facts.distribution_release | mandatory }}/updates main
+#

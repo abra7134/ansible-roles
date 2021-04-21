@@ -1,0 +1,54 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    debian_apt_http_proxy is not string                 or
+    debian_apt_https_proxy is not string                or
+    debian_network_dns_servers is string                or
+    debian_network_dns_servers is not sequence          or
+    debian_network_hosts is not mapping                 or
+    debian_packages is string                           or
+    debian_packages is not sequence                     or
+    debian_systemd_journal_persistent is not boolean    or
+    debian_users is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- import_tasks: debian_network.yml
+  tags:
+    - debian_network
+
+- import_tasks: debian_apt.yml
+  tags:
+    - debian_apt
+
+- name: Add users
+  user:
+    groups: "{{ item.value.groups | default(omit) }}"
+    name: "{{ item.key }}"
+    password: "{{ item.value.password | default(omit) }}"
+    comment: "{{ item.value.comment | default(omit) }}"
+    shell: "{{ item.value.shell | default('/bin/bash') }}"
+  loop: "{{ debian_users | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  tags:
+    - debian_users
+
+- name: Enable persistent storage of systemd's journal
+  file:
+    path: /var/log/journal
+    state: directory
+  when:
+    - debian_systemd_journal_persistent is sameas True
+  notify:
+    - Move journal to '/var/log/journal'
+  tags:
+    - debian_systemd_journal
+
+- meta: flush_handlers
