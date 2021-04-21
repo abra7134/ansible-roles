@@ -1,0 +1,45 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    telegraf_config is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Fetch package
+  get_url:
+    url: "{{ _telegraf_deb_url }}"
+    dest: "{{ _telegraf_path }}"
+
+- name: Install package
+  apt:
+    deb: "{{ _telegraf_path }}"
+    dpkg_options: force-confdef,force-confold,skip-same-version
+    state: present
+
+- name: Add user into 'www-data' group (for 'php56_fpm' module work)
+  user:
+    name: "{{ item }}"
+    groups: www-data
+  loop:
+    - telegraf
+  notify:
+    - Restart 'telegraf' service
+
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0640
+    group: telegraf
+  loop:
+    - /etc/telegraf/telegraf.conf
+  tags:
+    - telegraf_config
+  notify:
+    - Restart 'telegraf' service

@@ -1,0 +1,43 @@
+{{ ansible_managed | comment }}
+
+{% macro write_param(param, value) %}
+{% if value is string %}
+{{ param }} = "{{ value }}"
+{% elif value is boolean %}
+{{ param }} = {{ value | ternary('true', 'false') }}
+{% elif value is number %}
+{{ param }} = {{ value }}
+{% elif value is sequence %}
+{{ param }} = [ "{{ value | join('", "') }}" ]
+{% endif %}
+{% endmacro -%}
+
+{% for section in ["global_tags", "agent"] %}
+{% if telegraf_config[section] is mapping and telegraf_config[section] | length > 0 %}
+[{{ section }}]
+{% for param, value in telegraf_config[section].items() %}
+  {{ write_param(param, value) -}}
+{% endfor %}
+
+{% endif %}
+{% endfor %}
+{% for plugin_type in ["outputs", "inputs"] %}
+{% if telegraf_config[plugin_type] is mapping and telegraf_config[plugin_type] | length > 0 %}
+{% for plugin, params in telegraf_config[plugin_type].items() %}
+[[{{ plugin_type }}.{{ plugin }}]]
+{% if params is mapping %}
+{% for param, value in params.items() %}
+{% if value is mapping %}
+  [{{ plugin_type }}.{{ plugin }}.{{ param }}]
+{% for subparam, subvalue in value.items() %}
+    {{ write_param(subparam, subvalue) -}}
+{% endfor %}
+{% else %}
+  {{ write_param(param, value) -}}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+{% endif %}
+{% endfor %}
