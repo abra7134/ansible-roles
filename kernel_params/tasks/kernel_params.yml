@@ -1,0 +1,44 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    kernel_params_sysctl is not mapping    or
+    kernel_params_sysfs is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Install packages
+  apt:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - sysfsutils
+  when:
+    - kernel_params_sysfs | length > 0
+
+- name: Write 'sysctl' configuration files
+  template:
+    src: etc/sysctl.d/sysctl.conf.j2
+    dest: "/etc/sysctl.d/{{ item.key }}.conf"
+  with_dict: "{{ kernel_params_sysctl }}"
+  notify:
+    - Reload 'sysctl' settings
+  tags:
+    - kernel_params_config
+
+- name: Write 'sysfs' configuration files
+  template:
+    src: etc/sysfs.d/sysfs.conf.j2
+    dest: "/etc/sysfs.d/{{ item.key }}.conf"
+  with_dict: "{{ kernel_params_sysfs }}"
+  notify:
+    - Reload 'sysfs' settings
+  tags:
+    - kernel_params_config
+
+- meta: flush_handlers

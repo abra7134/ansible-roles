@@ -1,0 +1,11 @@
+---
+# The dictionary with sysctl parameters (saved in /etc/sysctl.d/{{ key }}.conf)
+kernel_params_sysctl: {}
+#  01-enable_rp_filter:
+#    net.ipv4.conf.default.rp_filter: 1
+#    net.ipv4.conf.all.rp_filter: 1
+
+# The dictionary with sysfs parameters (saved in /etc/sysfs.d/{{ key }}.conf)
+kernel_params_sysfs: {}
+#  01-disable_hugepage_defrag:
+#    kernel/mm/transparent_hugepage/defrag: never

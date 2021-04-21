@@ -1,0 +1,12 @@
+{% if item.value is mapping %}
+{% for param, values in item.value.items() %}
+{% if values is mapping %}
+{% for mod, value in values.iteritems() %}
+{{ mod+" " if mod in ["mode", "owner"] else "" -}}
+{{ param }} = {{ value }}
+{% endfor %}
+{% else %}
+{{ param }} = {{ values }}
+{% endif %}
+{% endfor %}
+{% endif %}

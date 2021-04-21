@@ -1,0 +1,11 @@
+---
+- name: Reload 'sysctl' settings
+  command: >-
+    /sbin/sysctl
+      --system
+      --quiet
+
+- name: Reload 'sysfs' settings
+  service:
+    name: sysfsutils
+    state: restarted

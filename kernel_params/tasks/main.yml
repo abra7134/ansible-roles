@@ -1,0 +1,4 @@
+---
+- import_tasks: kernel_params.yml
+  tags:
+    - kernel_params
