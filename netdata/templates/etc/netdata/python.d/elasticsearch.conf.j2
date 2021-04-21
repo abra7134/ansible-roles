@@ -1,0 +1,4 @@
+{{ ansible_managed | comment }}
+
+{% set config = item.value %}
+{{ config | to_nice_yaml }}

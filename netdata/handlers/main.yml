@@ -1,0 +1,11 @@
+---
+- name: Enable 'netdata' service
+  systemd:
+    daemon_reload: yes
+    enabled: yes
+    name: netdata.service
+
+- name: Restart 'netdata' service
+  service:
+    name: netdata
+    state: restarted

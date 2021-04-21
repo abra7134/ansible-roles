@@ -1,0 +1,15 @@
+{{ ansible_managed | comment }}
+
+# global netdata configuration
+
+{% set config = item.value %}
+{% if config is defined and config is mapping %}
+{% for section, params in config.items() %}
+[{{ section }}]
+{% if params is mapping %}
+{% for param, value in params.items() %}
+  {{ param }} = {{ value | ternary('yes', 'no') if value in [False, True] else value }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}

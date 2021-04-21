@@ -1,0 +1,8 @@
+{{ ansible_managed | comment }}
+
+{% set config = item.value %}
+{% if config is defined and config is mapping %}
+{% for param, value in config.items() %}
+{{ param }}="{{ value | ternary('YES', 'NO') if value in [False, True] else value }}"
+{% endfor %}
+{% endif %}
