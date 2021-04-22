@@ -33,10 +33,9 @@
 
 - name: Install packages
   apt:
-    name: "{{ item }}"
+    name:
+      - rsyslog-relp
     state: latest
-  loop:
-    - rsyslog-relp
   notify:
     - Remove '/etc/rsyslog.conf.dpkg-dist' file
 

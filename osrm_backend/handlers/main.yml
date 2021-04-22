@@ -1,0 +1,6 @@
+---
+- name: Restart 'osrm-routed' service
+  service:
+    enabled: yes
+    name: osrm-routed
+    state: restarted

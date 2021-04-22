@@ -23,11 +23,11 @@
 
 - name: Install packages
   apt:
-    name: "{{ item }}"
+    name:
+      - openssh-client
+      - openssh-server
     state: latest
   loop:
-    - openssh-client
-    - openssh-server
 
 - name: Write daemon configuration files
   template:

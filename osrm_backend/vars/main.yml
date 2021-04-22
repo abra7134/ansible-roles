@@ -1,0 +1,9 @@
+---
+# OSRM version to be installed
+_osrm_backend_version: "5.18.0"
+
+# OSRM URL download from
+_osrm_backend_binary_name: "osrm-backend-{{ _osrm_backend_version }}-binary.tar.bz2"
+
+# OSRM destination directory unpack to
+_osrm_backend_dir: "/opt/osrm_backend-{{ _osrm_backend_version }}"

@@ -18,23 +18,21 @@
   loop:
     - "{{ _netdata_dir }}"
 
-- name: Download and unpack binary archive
+- name: Copy and unpack binary archive
   unarchive:
     creates: "{{ _netdata_dir }}/etc/netdata/stream.conf"
     extra_opts:
       - --strip-components=1
-    src: "{{ _netdata_binary_url }}"
-    remote_src: yes
+    src: "{{ _netdata_binary_name }}"
     dest: "{{ _netdata_dir }}"
 
 - name: Install dependencies
   apt:
-    name: "{{ item }}"
+    name:
+      - util-linux
+      - zlib1g
+      - curl
     state: latest
-  loop:
-    - util-linux
-    - zlib1g
-    - curl
 
 - name: Add system group
   group:

@@ -1,0 +1,48 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    osrm_routed_config is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Create directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ _osrm_backend_dir }}"
+
+- name: Copy and unpack binary archive
+  unarchive:
+    creates: "{{ _osrm_backend_dir }}/README.md"
+    src: "{{ _osrm_backend_binary_name }}"
+    dest: "{{ _osrm_backend_dir }}"
+
+- name: Install dependencies
+  apt:
+    name:
+      - libboost-chrono1.62.0
+      - libboost-date-time1.62.0
+      - libboost-program-options1.62.0
+      - libboost-regex1.62.0
+      - libboost-thread1.62.0
+      - liblua5.2-0
+      - libtbb2
+    state: latest
+
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0644
+  loop:
+    - /etc/default/osrm-routed
+    - /etc/systemd/system/osrm-routed.service
+  notify:
+    - Restart 'osrm-routed' service

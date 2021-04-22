@@ -1,0 +1,4 @@
+---
+- import_tasks: osrm_backend.yml
+  tags:
+    - osrm_backend

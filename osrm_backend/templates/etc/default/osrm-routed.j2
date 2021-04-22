@@ -1,0 +1,8 @@
+{{ ansible_managed | comment }}
+
+{% for param, value in osrm_routed_config.items() %}
+{% if value is string or value is number %}
+{% set prefix="OSRM_ROUTED_" if param not in ["signal_parent_when_ready", "disable_access_logging"] else "" %}
+{{ prefix }}{{ param | upper }}={{ value }}
+{% endif %}
+{% endfor %}

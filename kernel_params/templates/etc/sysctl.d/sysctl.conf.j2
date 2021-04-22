@@ -1,3 +1,5 @@
+{{ ansible_managed | comment }}
+
 {% if item.value is mapping %}
 {% for param, value in item.value.items() %}
 {{ param }}={{ value }}

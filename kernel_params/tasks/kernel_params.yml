@@ -14,10 +14,9 @@
 
 - name: Install packages
   apt:
-    name: "{{ item }}"
+    name:
+      - sysfsutils
     state: latest
-  loop:
-    - sysfsutils
   when:
     - kernel_params_sysfs | length > 0
 

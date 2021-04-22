@@ -1,0 +1,43 @@
+---
+# OSRM backend configuration
+osrm_routed_config:
+  # IP address bind to
+  ip: 0.0.0.0
+  # IP port bind to
+  port: 5000
+
+  # Number of threads to use
+  threads: "{{ ansible_facts['processor_count'] }}"
+
+  # Load (=1) or not (=0) data from shared memory
+  shared_memory: 0
+
+  # Algorithm to use for the data. Can be CH, CoreCH, MLD
+  algorithm: CH
+
+  # Max locations supported in viaroute query
+  max_viaroute_size: 500
+  # Max locations supported in trip query
+  max_trip_size: 100
+  # Max locations supported in distance table query
+  max_table_size: 100
+  # Max locations supported in map matching query
+  max_matching_size: 100
+  # Max results supported in nearest query
+  max_nearest_size: 100
+  # Max number of alternatives supported in the MLD route query
+  max_alternatives: 3
+  # Max. radius size supported in map matching query. Default: unlimited
+  max_matching_radius: -1
+
+  # If variable is set osrm-routed will send the USR1 signal to its parent when it will be running and waiting
+  # for requests. This could be used to upgrade osrm-routed to a new binary on the fly without any service downtime
+  # no incoming requests will be lost.
+  signal_parent_when_ready:
+
+  # If variable is set osrm-routed will not log any http requests to standard output.
+  # This can be useful in high traffic setup.
+  disable_access_logging:
+
+  # Path to base osrm map
+  map_file:

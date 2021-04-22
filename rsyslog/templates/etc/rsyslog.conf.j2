@@ -1,3 +1,5 @@
+{{ ansible_managed | comment }}
+
 {% macro write_rsyslog_expressions(expressions) %}
 {% if expressions is string %}
 {{ expressions }};

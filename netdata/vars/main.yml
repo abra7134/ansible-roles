@@ -2,8 +2,8 @@
 # Netdata version to be installed
 _netdata_version: 1.6.0
 
-# Netdata URL download from and path to
-_netdata_binary_url: "https://f.gootax.pro/netdata-{{ _netdata_version }}-binary.tar.bz2"
+# Netdata URL download from
+_netdata_binary_name: "netdata-{{ _netdata_version }}-binary.tar.bz2"
 
 # Netdata destination directory unpack to
 _netdata_dir: "/opt/netdata-{{ _netdata_version }}"

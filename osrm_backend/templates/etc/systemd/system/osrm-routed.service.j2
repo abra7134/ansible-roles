@@ -1,0 +1,33 @@
+{{ ansible_managed | comment }}
+
+# If you modify this, please also make sure to edit init.sh
+
+[Unit]
+Description=Open Source Routing Machine computes shortest paths in a graph
+Documentation=https://github.com/Project-OSRM/osrm-backend/wiki
+After=network.target
+
+[Service]
+User=nobody
+Group=nogroup
+EnvironmentFile=/etc/default/osrm-routed
+ExecStart={{ _osrm_backend_dir }}/osrm-routed \
+  --ip=${OSRM_ROUTED_IP} \
+  --port=${OSRM_ROUTED_PORT} \
+  --threads=${OSRM_ROUTED_THREADS} \
+  --shared-memory=${OSRM_ROUTED_SHARED_MEMORY} \
+  --algorithm=${OSRM_ROUTED_ALGORITHM} \
+  --max-viaroute-size=${OSRM_ROUTED_MAX_VIAROUTE_SIZE} \
+  --max-trip-size=${OSRM_ROUTED_MAX_TRIP_SIZE} \
+  --max-table-size=${OSRM_ROUTED_MAX_TABLE_SIZE} \
+  --max-matching-size=${OSRM_ROUTED_MAX_MATCHING_SIZE} \
+  --max-nearest-size=${OSRM_ROUTED_MAX_NEAREST_SIZE} \
+  --max-alternatives=${OSRM_ROUTED_MAX_ALTERNATIVES} \
+  --max-matching-radius=${OSRM_ROUTED_MAX_MATCHING_RADIUS} \
+  ${OSRM_ROUTED_MAP_FILE}
+SyslogIdentifier=%p
+KillMode=control-group
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
