@@ -1,0 +1,4 @@
+---
+- import_tasks: app_download.yml
+  tags:
+    - app_download

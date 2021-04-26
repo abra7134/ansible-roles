@@ -1,0 +1,13 @@
+---
+# Application download from URL with optional auth data
+app_download_archive_url: ""
+app_download_archive_url_user: ""
+app_download_archive_url_password: ""
+
+# Application download to file path
+app_download_archive_path: ""
+# And unpack to directory
+app_download_dir: ""
+
+# Strip NUMBER leading components from file names on extraction
+app_download_tar_strip_components: 1

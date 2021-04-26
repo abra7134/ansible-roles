@@ -1,0 +1,18 @@
+---
+# The map with additional dependencies depending on the extension
+_app_download_archivers_map:
+  gz.sfs:
+    - squashfs-tools
+    - gzip
+  xz.sfs:
+    - squashfs-tools
+    - xz-utils
+  tar.bz2:
+    - tar
+    - bzip2
+  tar.gz:
+    - tar
+    - gzip
+  tar.xz:
+    - tar
+    - xz-utils

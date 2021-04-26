@@ -1,0 +1,65 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    app_download_archive_url is not string              or
+    app_download_archive_url_user is not string         or
+    app_download_archive_url_password is not string     or
+    app_download_archive_path is not string             or
+    app_download_dir is not string                      or
+    app_download_tar_strip_components is not number
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Install archivers if needed
+  apt:
+    name: "{{ _app_download_archivers_map[app_download_archive_url.split('.')[-2:] | join('.')] }}"
+    state: latest
+
+- name: Create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ app_download_archive_path | dirname }}"
+    - "{{ app_download_dir }}"
+
+# Used instead of get_url module because it's often get error:
+# "failed to create temporary content file: [Errno 104] Connection reset by peer"
+# And don't support a continue downloading
+- name: Download app archive
+  command: >-
+    wget
+      --continue
+      --no-verbose
+      --output-document="{{ app_download_archive_path }}"
+      {% if app_download_archive_url_user != None %}
+      --user "{{ app_download_archive_url_user }}"
+      {% if app_download_archive_url_password != None %}
+      --password "{{ app_download_archive_url_password }}"
+      {% endif %}
+      {% endif %}
+      "{{ app_download_archive_url }}"
+
+- name: Unpack the application archive
+  unarchive:
+    copy: no
+    dest: "{{ app_download_dir }}"
+    extra_opts: "--strip-components={{ app_download_tar_strip_components }}"
+    src: "{{ app_download_archive_path }}"
+  when:
+    - app_download_archive_url.split('.')[-2] == 'tar'
+
+- name: Or mount squashed application archive
+  mount:
+    fstype: squashfs
+    name: "{{ app_download_dir }}"
+    src: "{{ app_download_archive_path }}"
+    state: mounted
+  when:
+    - app_download_archive_url.endswith('.sfs')
