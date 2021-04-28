@@ -1,0 +1,59 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    racoon_tool_config is not mapping            or
+    racoon_tool_preshared_keys is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Pin the actual version
+  copy:
+    content: |
+      Package: racoon
+      Pin: version {{ _racoon_version }}+*
+      Pin-Priority: 1001
+    dest: /etc/apt/preferences.d/00racoon
+    mode: 0644
+
+- name: Install packages
+  apt:
+    name:
+      - racoon
+    state: latest
+  notify:
+    - Stop 'racoon' service
+
+- name: Fix the 'racoon-tool' binary to support kernel 4.X versions
+  lineinfile:
+    dest: /usr/sbin/racoon-tool
+    line: '	$modext = ( $kver =~ /^2\.6\.|^3\.|^4\./ ? ".ko" : ".o" );'
+    regexp: '\$modext = \( \$kver'
+
+- name: Create directory
+  file:
+    group: racoon
+    owner: racoon
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /var/run/racoon
+
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0644
+  loop:
+    - /etc/systemd/system/racoon-tool.service
+    - /etc/racoon/racoon-tool.conf
+    - /etc/racoon/psk.txt
+  notify:
+    - Restart 'racoon-tool' service
+  tags:
+    - racoon_tool_config

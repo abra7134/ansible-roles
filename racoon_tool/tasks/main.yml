@@ -1,0 +1,4 @@
+---
+- import_tasks: racoon_tool.yml
+  tags:
+    - racoon_tool

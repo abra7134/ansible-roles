@@ -1,0 +1,24 @@
+{{ ansible_managed | comment }}
+
+{% macro racoon_write_params(section, params) %}
+{% if params is mapping %}
+{{ section }}:
+{% for param, value in params.items() %}
+{% if value in [True, False] %}
+  {{ param }}: {{ value | ternary('yes', 'no') }}
+{% else %}
+  {{ param }}: {{ value }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endmacro -%}
+
+{% for section in ('global', 'connections', 'peers') %}
+{% if section == 'global' %}
+{{ racoon_write_params(section, racoon_tool_config[section]) }}
+{% else %}
+{% for subsection in racoon_tool_config[section] %}
+{{ racoon_write_params('%s(%s)' % (section.rstrip('s'), subsection), racoon_tool_config[section][subsection]) }}
+{% endfor %}
+{% endif %}
+{% endfor %}

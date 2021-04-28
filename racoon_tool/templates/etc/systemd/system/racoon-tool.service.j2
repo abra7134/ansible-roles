@@ -1,0 +1,13 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Racoon-tool for running Racoon IPSEC daemon and setkey
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/racoon-tool start
+ExecStop=/usr/sbin/racoon-tool stop
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target

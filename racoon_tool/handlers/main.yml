@@ -1,0 +1,13 @@
+---
+- name: Stop 'racoon' service
+  systemd:
+    enabled: no
+    name: racoon
+    state: stopped
+
+- name: Restart 'racoon-tool' service
+  systemd:
+    daemon_reload: yes
+    enabled: yes
+    name: racoon-tool
+    state: restarted
