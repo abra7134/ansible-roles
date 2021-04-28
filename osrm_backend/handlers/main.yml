@@ -1,6 +1,7 @@
 ---
 - name: Restart 'osrm-routed' service
-  service:
+  systemd:
+    daemon_reload: yes
     enabled: yes
     name: osrm-routed
     state: restarted
