@@ -4,5 +4,3 @@ _telegraf_version: "0.12.1-1"
 
 # Telegraf URL download from
 _telegraf_deb_url: "https://dl.influxdata.com/telegraf/releases/telegraf_{{ _telegraf_version }}_amd64.deb"
-# Telegraf destination path download to
-_telegraf_path: "/opt/{{ _telegraf_deb_url | basename }}"

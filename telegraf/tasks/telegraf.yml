@@ -11,14 +11,9 @@
     state: latest
   check_mode: no
 
-- name: Fetch package
-  get_url:
-    url: "{{ _telegraf_deb_url }}"
-    dest: "{{ _telegraf_path }}"
-
 - name: Install package
   apt:
-    deb: "{{ _telegraf_path }}"
+    deb: "{{ _telegraf_deb_url }}"
     dpkg_options: force-confdef,force-confold,skip-same-version
     state: present
 
