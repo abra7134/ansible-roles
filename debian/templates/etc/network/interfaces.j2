@@ -10,7 +10,7 @@
 auto lo
 iface lo inet loopback
 {% for dns_server in debian_network_dns_servers %}
-    dns-nameserver {{ dns_server }}
+       dns-nameserver {{ dns_server }}
 {% endfor %}
 
 {% for iface_name, iface_params in debian_network_interfaces.items() %}
@@ -35,7 +35,7 @@ iface {{ iface_name }} inet static
 {% endif %}
 {% endfor %}
 {% endif %}
-{% if iface_params['address6'] is defined %}
+{% if iface_params['address6'] is defined and iface_params['address6'] != None and iface_params['address6'] != "" %}
 
 iface {{ iface_name }} inet6 static
        address {{ iface_params['address6'] }}
