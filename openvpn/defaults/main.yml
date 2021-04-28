@@ -1,0 +1,26 @@
+---
+# The dictionary with OpenVPN tunnels configurations
+openvpn_configs: {}
+  # client1:
+  #   dev: tun
+  #   remote: mypeer.mydomain
+  #   ifconfig: 10.0.0.2 10.0.0.1
+  #   secret: |
+  #     -----BEGIN OpenVPN Static key V1-----
+  #     4fda3b3fc8422556540cb7d4bc38e76c
+  #     0352b4234be9bff9828ee8140793d11c
+  #     f50b5b022ae17cb581dfce5d2ff40f49
+  #     c5dc6e91f0c1628114d9be96dee4fdc5
+  #     efd55688f71291990a822f850d311130
+  #     9ba1adc82acd05e5ec43ffd4e7cc00f2
+  #     8306f367bfb34f6e6deca6967edffc39
+  #     24a56c0d3407147405965d8e0559bb4b
+  #     0030dc643985dab013833feb1ab839f2
+  #     27c8095cbd483376d55bab4e4484f3d9
+  #     7fc7f6c1286cb37d39578f9d0015a645
+  #     677e356741c50c8d1ab519e6dedf88af
+  #     d56d8f952083ae92f4fb3a7681a9001a
+  #     352e30fac632cfdbab801f3fb4787662
+  #     992a0659e297a74858fe3f763912fcf9
+  #     03d4209805dd273275fba6deb4e9c3f2
+  #     -----END OpenVPN Static key V1-----

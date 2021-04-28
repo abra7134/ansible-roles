@@ -1,0 +1,14 @@
+---
+# The 'openvpn' version to be installed
+_openvpn_version: >-
+  {{ [ansible_facts.distribution_release | mandatory]
+     | map(
+         'extract',
+         {
+           'jessie': '2.3.4',
+           'stretch': '2.4.0',
+           'buster': '2.4.7'
+         }
+       )
+     | first
+  }}

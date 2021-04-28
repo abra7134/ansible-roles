@@ -43,3 +43,5 @@
     - telegraf_config
   notify:
     - Restart 'telegraf' service
+
+- meta: flush_handlers

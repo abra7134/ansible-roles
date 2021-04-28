@@ -57,3 +57,5 @@
     - Restart 'racoon-tool' service
   tags:
     - racoon_tool_config
+
+- meta: flush_handlers

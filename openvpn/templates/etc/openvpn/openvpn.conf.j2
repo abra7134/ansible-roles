@@ -1,0 +1,29 @@
+{{ ansible_managed | comment }}
+
+{% set config_name, config_params = item.key, item.value %}
+{% if config_params is mapping %}
+{% for param_name, param_values in config_params.items() %}
+{% if param_values is not sameas False %}
+{% if     param_name in ('ca', 'cert', 'dh', 'extra-certs', 'key', 'pkcs12', 'secret', 'tls-auth')
+      and param_values.split('\n') | count > 1 %}
+<{{ param_name }}>
+{{ param_values }}
+</{{ param_name }}>
+{% elif param_values is none or param_values is sameas True %}
+{{ param_name }}
+{% elif param_name in ('push', 'remote', 'http-proxy-option', 'route', 'ignore-unknown-option', 'plugin', 'x509-track') and param_values is sequence and param_values is not string %}
+{% for param_value in param_values %}
+{% if param_name in ('push') %}
+{{ param_name }} "{{ param_value if param_value is number else param_value.split('\n')[0] }}"
+{% else %}
+{{ param_name }} {{ param_value if param_value is number else param_value.split('\n')[0] }}
+{% endif %}
+{% endfor %}
+{% elif param_name in ('up', 'tls-verify', 'ipchange', 'client-connect', 'route-up', 'route-pre-down', 'client-disconnect', 'down', 'learn-address', 'auth-user-pass-verify', 'push') %}
+{{ param_name }} "{{ param_values if param_values is number else param_values.split('\n')[0] }}"
+{% else %}
+{{ param_name }} {{ param_values if param_values is number else param_values.split('\n')[0] }}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}

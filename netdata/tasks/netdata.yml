@@ -94,3 +94,5 @@
     - Restart 'netdata' service
   tags:
     - netdata_config
+
+- meta: flush_handlers
