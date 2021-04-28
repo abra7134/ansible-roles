@@ -1,0 +1,104 @@
+---
+# The dictionary with backups configurations
+backups_rclone: {}
+  # name_of_backup:
+  #   [required settings]
+  #   [optional settings]
+  #   [type settings]
+
+  # Required settings are:
+  #   remote: The specify a rclone remote to copy to (from backups_rclone_remotes variable)
+  #   type: The type of this backup (archive, elasticdump, mysqldump)
+
+  # Optional settings are:
+  #   oncalendar: Run a backup on calendar time (in systemd.time format)
+  #               !!! Has an advantage over 'frequency' variable
+  #   frequency: The override the default value from backups_rclone_frequency variable
+  #   local_age_days: The override the default value from backups_rclone_local_age_days variable
+  #   remote_age_days: The override the default value from backups_rclone_remote_age_days variable
+  #   remote_cleanup: Run or not the remote a trash cleaning operation
+  #   post_command: The shell command to run after a backup prepare
+  #   pre_command: The shell command to run before a backup prepare
+  #   sync_exclude: The list of excludes from copy to remote storage (in rclone filtering format, see https://rclone.org/filtering/)
+
+  # Type settings are:
+  #   for type==archive
+  #     options:
+  #       archiver: tar.bz2 or sfs.gz
+  #       paths:
+  #         - /path1
+  #         - /path2/path3
+  #       since: 2020-01-01 # Only for archiver == tar.bz2
+  #   for type==elasticdump
+  #     options:
+  #       indices:
+  #         - index1
+  #         - index2
+  #   for type==influxdbackup
+  #     options:
+  #       archiver: tar.bz2 or sfs.gz
+  #       databases:
+  #         - database1
+  #         - database2
+  #       host: http://127.0.0.1:8088/
+  #       since: 20200101T00:00:00Z
+  #   for type==minio
+  #     options:
+  #       archiver: tar.bz2 or sfs.gz
+  #       buckets:
+  #         - bucket1
+  #         - bucket2
+  #         - bucket3
+  #       source: local
+  #   for type==mongodump
+  #     options:
+  #       databases:
+  #         - database1
+  #         - database2: collection1
+  #         - database2: collection2
+  #       host: 127.0.0.1:27017
+  #       query_filter:
+  #   for type==mysqldump
+  #     options:
+  #       databases:
+  #         - database1
+  #         - database2
+
+# The dictionary with rlclone's remotes settings
+# (see https://rclone.org/overview/ for more information)
+backups_rclone_remotes: {}
+  # selectel-s3:
+  #   type: s3
+  #   provider: Other
+  #   env_auth: false
+  #   access_key_id: AccessID
+  #   secret_access_key: Password
+  #   region: ru-1a
+  #   endpoint: https://s3.selcdn.ru
+  #   acl: private
+
+# The remote name is using by default if it's not overriden at backup configuration
+# in rclone's format: remote_name:remote_path/
+backups_rclone_default_remote: ""
+
+# Specifies how many days backups will be stored by default on local and remote sides
+backups_rclone_local_age_days: 7
+backups_rclone_remote_age_days: 31
+
+# Specifies the how often the backups scripts will be run by default (in systemd.time format)
+backups_rclone_frequency: 1 day
+
+# The directory to backups store
+backups_rclone_dir: /opt/backups
+
+# The template of backups filenames with directories if necessary
+backups_rclone_filenames_prefix: "${HOSTNAME}-$(date +%Y%m%d%H%M)"
+
+# The specific modules options
+backups_rclone_elasticdump_options: ""
+backups_rclone_mc_options: --preserve --quiet
+backups_rclone_mksquashfs_options: -no-progress -no-xattrs
+backups_rclone_mongodump_options: --numParallelCollections=1
+backups_rclone_mysqldump_options: --compress --routines --single-transaction
+backups_rclone_rclone_options: --log-format '' --stats 0 --verbose --timeout 30s
+backups_rclone_tar_options: --absolute-names --seek --warning=no-file-changed

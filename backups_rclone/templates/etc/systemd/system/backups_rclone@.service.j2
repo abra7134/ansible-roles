@@ -1,0 +1,9 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Script for regular backups based on rclone
+
+[Service]
+ExecStart=/opt/backups_rclone.sh %i
+SyslogIdentifier=%p
+Type=oneshot

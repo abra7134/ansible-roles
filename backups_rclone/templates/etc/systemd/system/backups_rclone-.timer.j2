@@ -1,0 +1,29 @@
+{{ ansible_managed | comment }}
+
+{% set backup_name = item[0] -%}
+{% set backup_params = backups_rclone[backup_name] -%}
+
+[Unit]
+Description=Timer for running a regular backup '{{ backup_name }}'
+
+[Timer]
+AccuracySec=5 minutes
+{% if 'oncalendar' in backup_params %}
+{% if backup_params.oncalendar is sequence and backup_params.oncalendar is not string %}
+{% for oncalendar_item in backup_params.oncalendar %}
+OnCalendar={{ oncalendar_item }}
+{% endfor %}
+{% elif backup_params.oncalendar is string and backup_params.oncalendar != '' %}
+OnCalendar={{ backup_params.oncalendar }}
+{% elif backup_params.oncalendar is string and backup_params.oncalendar == '' %}
+OnBootSec={{ backup_params.frequency | default(backups_rclone_frequency) }}
+OnUnitActiveSec={{ backup_params.frequency | default(backups_rclone_frequency) }}
+{% endif %}
+{% else %}
+OnBootSec={{ backup_params.frequency | default(backups_rclone_frequency) }}
+OnUnitActiveSec={{ backup_params.frequency | default(backups_rclone_frequency) }}
+{% endif %}
+Unit=backups_rclone@{{ backup_name }}.service
+
+[Install]
+WantedBy=timers.target

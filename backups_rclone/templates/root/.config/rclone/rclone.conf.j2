@@ -1,0 +1,15 @@
+{{ ansible_managed | comment }}
+
+{% for remote_name, remote_params in backups_rclone_remotes.items() %}
+{% if remote_params is mapping %}
+[{{ remote_name }}]
+{% for remote_param_name, remote_param_value in remote_params.items() %}
+{% if remote_param_value is mapping %}
+{{ remote_param_name }} = {{ remote_param_value | to_json }}
+{% else %}
+{{ remote_param_name }} = {{ remote_param_value }}
+{% endif %}
+{% endfor %}
+
+{% endif %}
+{% endfor %}

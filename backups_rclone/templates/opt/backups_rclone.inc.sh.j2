@@ -1,0 +1,470 @@
+#!/bin/bash
+
+{{ ansible_managed | comment }}
+
+ELASTICDUMP_OPTIONS=({{ backups_rclone_elasticdump_options }})
+MKSQUASHFS_OPTIONS=({{ backups_rclone_mksquashfs_options }})
+MC_OPTIONS=({{ backups_rclone_mc_options }})
+MONGODUMP_OPTIONS=({{ backups_rclone_mongodump_options }})
+MYSQLDUMP_OPTIONS=({{ backups_rclone_mysqldump_options }})
+RCLONE_OPTIONS=({{ backups_rclone_rclone_options }})
+TAR_OPTIONS=({{ backups_rclone_tar_options }})
+
+set -o pipefail
+
+_check_commands() {
+  for required_command in ${*};
+  do
+    if ! type -P "${required_command}" >/dev/null
+    then
+      echo "ERROR: The required command '${required_command}' is not exist"
+      echo "       Please check your PATH environment variable"
+      echo "       And install a required command through your package manager"
+      echo
+      exit 1
+    fi
+  done
+}
+
+_make_simple_any() {
+  ${@}
+}
+
+_make_simple_about() {
+  local backup_rclone_remote="${1}"
+
+  rclone \
+    about \
+    "${backup_rclone_remote}" \
+    "${RCLONE_OPTIONS[@]}"
+}
+
+_make_simple_cleanup() {
+  local backup_rclone_remote="${1}"
+
+  rclone \
+    cleanup \
+    "${backup_rclone_remote}" \
+    "${RCLONE_OPTIONS[@]}"
+}
+
+_make_simple_delete() {
+  local backup_rclone_remote="${1}"
+  local backup_remote_age_days="${2}"
+
+  rclone \
+    delete \
+    "${backup_rclone_remote}" \
+    "${RCLONE_OPTIONS[@]}" \
+    --min-age "${backup_remote_age_days}d"
+}
+
+_make_simple_delete_tmp() {
+  local backup_rclone_remote="${1}"
+
+  rclone \
+    delete \
+    "${backup_rclone_remote}" \
+    "${RCLONE_OPTIONS[@]}" \
+    --include '*.rclone_chunk.*..tmp_*'
+}
+
+_make_simple_rmdirs() {
+  local backup_rclone_remote="${1}"
+
+  rclone \
+    rmdirs \
+    "${backup_rclone_remote}" \
+    "${RCLONE_OPTIONS[@]}" \
+    --leave-root
+}
+
+_make_simple_copy() {
+  local backup_rclone_remote="${1}"
+  local backup_remote_age_days="${2}"
+  local backup_sync_exclude="${3}"
+
+  rclone \
+    copy \
+    "." \
+    "${backup_rclone_remote}" \
+    "${RCLONE_OPTIONS[@]}" \
+    --exclude "${backup_sync_exclude}" \
+    --max-age "${backup_remote_age_days}d"
+}
+
+make_simple() {
+  local operation="${1}"
+  local description="${2}"
+  shift 2
+
+  echo "--> ${description}:"
+
+  SECONDS=0
+  _make_simple_${operation} "${@}"
+
+  if [ ${?} -gt 0 ]
+  then
+    echo "    FAILED to ${description,,}, skipping."
+  else
+    echo "    OK, complete (by $((SECONDS/60)) minutes $((SECONDS%60)) seconds)."
+  fi
+}
+
+_make_archive() {
+  local options="${1}"
+  local archiver="${2}"
+  shift 2
+  local paths="${@}"
+
+  if [ "${archiver}" == "tar.bz2" ]
+  then
+    _check_commands bzip2 tar
+    backup_filename+=".tar.bz2"
+
+    echo "--> Make tar.bz2 archive from paths: ${paths}"
+    if test -n "${options}"
+    then
+      echo "--> with additional options: ${options}"
+    fi
+
+    if ! test -s "${backup_filename}"
+    then
+      tar \
+        "${TAR_OPTIONS[@]}" \
+        ${options} \
+        --bzip2 \
+        --create \
+        --file "${backup_filename}" \
+        ${paths}
+      if [ ${?} -gt 0 ]
+      then
+        echo "    FAILED to create tar.bz2 archive, skipping."
+        return 1
+      fi
+    else
+      echo "    EXIST, skipping."
+      return 1
+    fi
+  elif [ "${archiver}" == "sfs.gz" ]
+  then
+    _check_commands mksquashfs
+    backup_filename+=".sfs.gz"
+
+    echo "--> Make sfs.gz archive from paths: ${paths}"
+    if ! test -s "${backup_filename}"
+    then
+      mksquashfs \
+        ${paths} \
+        ${backup_filename} \
+        "${MKSQUASHFS_OPTIONS[@]}" \
+        -comp gzip
+      if [ ${?} -gt 0 ]
+      then
+        echo "    FAILED to create sfs.gz archive, skipping."
+        return 1
+      fi
+    else
+      echo "    EXIST, skipping."
+      return 1
+    fi
+  else
+    echo "    FAILED: The specified archiver type = '${archiver}' is not supported, skipping."
+    return 1
+  fi
+}
+
+_make_elasticdump() {
+  local index_name="${1}"
+  local dump_type="${2}"
+
+  backup_filename+="-${index_name}.${dump_type}.json.bz2"
+
+  _check_commands elasticdump bzip2
+
+  echo "--> Dump Elasticsearch index '${index_name}' (${dump_type}):"
+  if ! test -s "${backup_filename}"
+  then
+    elasticdump \
+      "${ELASTICDUMP_OPTIONS[@]}" \
+      --input="http://127.0.0.1:9200/${index_name}" \
+      --output=$ \
+      --type="${dump_type}" \
+    | bzip2 \
+        --best \
+      > "${backup_filename}"
+    if [ ${?} -gt 0 ]
+    then
+      echo "    FAILED to getting of dump, skipping."
+      rm \
+        --force \
+        "${backup_filename}"
+      return 1
+    fi
+  else
+    echo "    EXIST, skipping."
+    return 1
+  fi
+}
+
+_make_influxdbackup() {
+  local host="${1}"
+  local database_name="${2}"
+  local archiver="${3}"
+  local since="${4}"
+
+  backup_filename+="-${database_name}"
+
+  _check_commands influxd mktemp
+
+  echo "--> Dump Influx database '${database_name}':"
+  if ! test -s "${backup_filename}"
+  then
+    TMP_DIR=$(mktemp --directory)
+    if [ ${?} -gt 0 ]
+    then
+      echo "    FAILED to create a temporary directory, skipping."
+      return 1
+    fi
+
+    influxd \
+      backup \
+      -host "${host}" \
+      -database "${database_name}" \
+      ${since:+-since "${since}"} \
+      "${TMP_DIR}"
+    if [ ${?} -gt 0 ]
+    then
+      echo "    FAILED to getting of dump, skipping."
+      rm \
+        --force \
+        --recursive \
+        "${TMP_DIR}" \
+        "${backup_filename}"
+      return 1
+    fi
+
+    _make_archive "" "${archiver}" "${TMP_DIR}"
+    local make_archive_exitcode="${?}"
+
+    rm \
+      --force \
+      --recursive \
+      "${TMP_DIR}"
+    if [ ${?} -gt 0 ]
+    then
+      echo "    FAILED to remove a temporary directory, skipping."
+      return 1
+    fi
+
+    return "${make_archive_exitcode}"
+  else
+    echo "    EXIST, skipping."
+    return 1
+  fi
+}
+
+_make_minio() {
+  local source="${1}"
+  local bucket="${2}"
+  local archiver="${3}"
+
+  backup_filename+="-${bucket}"
+
+  _check_commands mc mktemp
+
+  echo "--> Dump Minio bucket '${bucket}':"
+  if ! test -s "${backup_filename}"
+  then
+    TMP_DIR=$(mktemp --directory)
+    if [ ${?} -gt 0 ]
+    then
+      echo "    FAILED to create a temporary directory, skipping."
+      return 1
+    fi
+
+    mc \
+      cp \
+      "${MC_OPTIONS[@]}" \
+      --recursive \
+      "${source}/${bucket}" \
+      "${TMP_DIR}"
+    if [ ${?} -gt 0 ]
+    then
+      echo "    FAILED to getting of copy, skipping."
+      rm \
+        --force \
+        --recursive \
+        "${TMP_DIR}" \
+        "${backup_filename}"
+      return 1
+    fi
+
+    _make_archive "" "${archiver}" "${TMP_DIR}"
+    local make_archive_exitcode="${?}"
+
+    rm \
+      --force \
+      --recursive \
+      "${TMP_DIR}"
+    if [ ${?} -gt 0 ]
+    then
+      echo "    FAILED to remove a temporary directory, skipping."
+      return 1
+    fi
+
+    return "${make_archive_exitcode}"
+  else
+    echo "    EXIST, skipping."
+    return 1
+  fi
+}
+
+_make_mongodump() {
+  local host="${1}"
+  local database_name="${2}"
+  local collection_name="${3}"
+  local query_filter="${4}"
+
+  backup_filename+="-${database_name}-${collection_name:-all}.mongodump.gz"
+
+  _check_commands mongodump
+
+  echo "--> Dump Mongo database '${database_name}' with '${collection_name:-all}' collection(s):"
+  if test -n "${query_filter}"
+  then
+    echo "--> with query filter: ${query_filter}"
+  fi
+
+  if ! test -s "${backup_filename}"
+  then
+    mongodump \
+      "${MONGODUMP_OPTIONS[@]}" \
+      --archive="${backup_filename}" \
+      --db="${database_name}" \
+      ${collection_name:+--collection="${collection_name}"} \
+      --gzip \
+      --host="${host}" \
+      --query="${query_filter}" \
+      --readPreference="nearest"
+    if [ ${?} -gt 0 ]
+    then
+      echo "    FAILED to getting of dump, skipping."
+      rm \
+        --force \
+        "${backup_filename}"
+      return 1
+    fi
+  else
+    echo "    EXIST, skipping."
+    return 1
+  fi
+}
+
+_make_mysqldump() {
+  local database_name="${1}"
+
+  backup_filename+="-${database_name}.sql.bz2"
+  local max_statement_time
+
+  _check_commands bzip2 mysql mysqldump sed
+
+  echo "--> Dump MySQL database '${database_name}':"
+  if ! test -s "${backup_filename}"
+  then
+    max_statement_time=$(
+      mysql \
+        --batch \
+        --execute="show global variables;" \
+        --skip-column-names \
+      | sed \
+          --silent \
+          "/max_statement_time/s///gp"
+    )
+    if [ ${?} -gt 0 ]
+    then
+      echo "    FAILED to get current values of 'max_statement_time' variable, skipping."
+      return 1
+    fi
+
+    mysql \
+      --execute="set global max_statement_time=0;"
+    if [ ${?} -gt 0 ]
+    then
+      echo "    FAILED to set 'max_statement_time' variable to 0, skipping."
+      return 1
+    fi
+
+    mysqldump \
+      "${MYSQLDUMP_OPTIONS[@]}" \
+      "${database_name}" \
+    | bzip2 \
+        --best \
+      > "${backup_filename}"
+    if [ ${?} -gt 0 ]
+    then
+      echo "    FAILED to getting of dump, skipping."
+      rm \
+        --force \
+        "${backup_filename}"
+      return 1
+    fi
+
+    mysql \
+      --execute="set global max_statement_time=${max_statement_time};"
+    if [ ${?} -gt 0 ]
+    then
+      echo "    FAILED to revert value of 'max_statement_time' variable to ${max_statement_time}, skipping."
+      return 1
+    fi
+  else
+    echo "    EXIST, skipping."
+    return 1
+  fi
+}
+
+make_operation() {
+  local operation="${1}"
+  shift
+
+  local backup_filename="${DEFAULT_FILENAMES_PREFIX}-${backup_name}"
+  local backup_filename_size
+
+  # If $backup_filename contains a directory, then create it
+  if [ "${backup_filename%/*}" != "${backup_filename}" ]
+  then
+    mkdir \
+      --parents \
+      "${backup_filename%/*}"
+  fi
+
+  SECONDS=0
+  _make_${operation} "${@}"
+
+  if [ ${?} -lt 1 ]
+  then
+    backup_filename_size=$(
+      stat \
+        --printf="%s" \
+        "${backup_filename}"
+    )
+    if [ ${?} -gt 0 ]
+    then
+      echo "    FAILED to get size of dump, skipping."
+      return
+    fi
+
+    md5sum \
+      "${backup_filename}" \
+    > "${backup_filename}.md5"
+    if [ ${?} -gt 0 ]
+    then
+      echo "    FAILED to md5sum calculate, skipping."
+      return
+    fi
+
+    echo "    OK, complete ($((backup_filename_size/1024)) kbytes by $((SECONDS/60)) minutes $((SECONDS%60)) seconds)."
+  fi
+}
+
+_check_commands rclone stat md5sum

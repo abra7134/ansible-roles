@@ -1,0 +1,76 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    backups_rclone is not mapping                       or
+    backups_rclone_remotes is not mapping               or
+    backups_rclone_default_remote is not string         or
+    backups_rclone_local_age_days is not number         or
+    backups_rclone_remote_age_days is not number        or
+    backups_rclone_frequency is not string              or
+    backups_rclone_dir is not string                    or
+    backups_rclone_filenames_prefix is not string       or
+    backups_rclone_elasticdump_options is not string    or
+    backups_rclone_mc_options is not string             or
+    backups_rclone_mksquashfs_options is not string     or
+    backups_rclone_mongodump_options is not string      or
+    backups_rclone_mysqldump_options is not string      or
+    backups_rclone_rclone_options is not string         or
+    backups_rclone_tar_options is not string
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Install packages
+  apt:
+    deb: "{{ item if item.startswith('https://') else omit }}"
+    dpkg_options: force-confdef,force-confold,skip-same-version
+    name: "{{ item if not item.startswith('https://') else omit }}"
+    state: present
+  loop:
+    - "{{ _backups_rclone_deb_url }}"
+    - fuse
+    - squashfs-tools
+  loop_control:
+    label: "{{ item | basename }}"
+
+- name: Create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /root/.config/rclone
+
+- block:
+  - name: Install static files and configurations
+    template:
+      src: "{{ item.strip('/') }}.j2"
+      dest: "{{ item }}"
+      mode: "{{ 0755 if item.endswith('.sh') and not item.endswith('.inc.sh') else 0644 }}"
+    loop:
+      - /etc/systemd/system/backups_rclone@.service
+      - /root/.config/rclone/rclone.conf
+      - /opt/backups_rclone.inc.sh
+      - /opt/backups_rclone.sh
+
+  - name: Install backups scripts and them systemd timer unit files
+    template:
+      src: "{{ item[1].strip('/') }}.j2"
+      dest: "{{ item[1] | replace('backups_rclone-', 'backups_rclone-%s' % (item[0])) }}"
+      mode: "{{ 0755 if item[1].endswith('.sh') else 0644 }}"
+    loop: "{{ backups_rclone.keys() | product(['/opt/backups_rclone-.sh', '/etc/systemd/system/backups_rclone-.timer']) | list }}"
+
+  - name: Activate and restart installed systemd timers
+    systemd:
+      daemon-reload: yes
+      enabled: yes
+      name: "backups_rclone-{{ item }}.timer"
+      state: restarted
+    loop:
+      - backups_rclone.keys()
+  tags:
+    - backups_rclone_config

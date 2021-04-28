@@ -1,0 +1,106 @@
+#!/bin/bash
+
+{{ ansible_managed | comment }}
+
+DEFAULT_FILENAMES_PREFIX="{{ backups_rclone_filenames_prefix }}"
+DEFAULT_BACKUPS_DIR="{{ backups_rclone_dir }}"
+
+export HOME=/root
+source "${0/-*.sh/.inc.sh}"
+
+{% set backup_name = item[0] -%}
+{% set backup_params = backups_rclone[backup_name] -%}
+
+backup_name="{{ backup_name }}"
+backup_type="{{ backup_params.type }}"
+backup_subdir="${DEFAULT_BACKUPS_DIR}/${backup_name}"
+backup_local_age_days={{ backup_params.local_age_days | default(backups_rclone_local_age_days) }}
+backup_remote_age_days={{ backup_params.remote_age_days | default(backups_rclone_remote_age_days) }}
+backup_remote_cleanup="{{ backup_params.remote_cleanup | default('') }}"
+backup_rclone_remote="{{ backup_params.remote | default('%s%s/' % (backups_rclone_default_remote, backup_name)) }}"
+backup_pre_command="{{ backup_params.pre_command | default('') }}"
+backup_post_command="{{ backup_params.post_command | default('') }}"
+backup_sync_exclude="{{ backup_params.sync_exclude | default('') }}"
+
+echo "[!] Run backup '${backup_name}' with type '${backup_type}'"
+echo "    stored at: ${backup_subdir} (with max age: ${backup_local_age_days} days)"
+echo "    copy to: ${backup_rclone_remote} (with max age: ${backup_remote_age_days} days)"
+echo "    --------"
+
+mkdir --parents "${backup_subdir}"
+pushd "${backup_subdir}" >/dev/null
+
+make_simple delete "Delete local older archives" "." "${backup_local_age_days}"
+make_simple rmdirs "Delete local empty directories" "."
+
+if test -n "${backup_pre_command}"; then
+  make_simple any "Run pre_command '${backup_pre_command}'" "${backup_pre_command}"
+fi
+
+{% if backup_params.type == 'archive' %}
+make_operation {{ backup_params.type }} \
+{% if backup_params.options.archiver == 'tar.bz2' and backup_params.options.since is defined %}
+  "{{ "--newer-mtime=" ~ backup_params.options.since }}" \
+{% else %}
+  "" \
+{% endif %}
+  "{{ backup_params.options.archiver }}" \
+  "{{ backup_params.options.paths | join(' ') }}"
+{% elif backup_params.type == 'elasticdump' %}
+{% for index in backup_params.options.indices %}
+make_operation {{ backup_params.type }} "{{ index }}" "data"
+make_operation {{ backup_params.type }} "{{ index }}" "mapping"
+{% endfor %}
+{% elif backup_params.type == 'influxdbackup' %}
+{% for database in backup_params.options.databases %}
+make_operation {{ backup_params.type }} \
+  "{{ backup_params.options.host | default('127.0.0.1:8088') }}" \
+  "{{ database }}" \
+  "{{ backup_params.options.archiver }}" \
+  "{{ backup_params.options.since | default('') }}"
+{% endfor %}
+{% elif backup_params.type == 'minio' %}
+{% for bucket in backup_params.options.buckets %}
+make_operation {{ backup_params.type }} \
+  "{{ backup_params.options.source | default('local') }}" \
+  "{{ bucket }}" \
+  "{{ backup_params.options.archiver }}"
+{% endfor %}
+{% elif backup_params.type == 'mongodump' %}
+{% for database in backup_params.options.databases %}
+make_operation {{ backup_params.type }} \
+  "{{ backup_params.options.host | default('127.0.0.1:27017') }}" \
+{% if database is string %}
+  "{{ database }}" \
+  "" \
+{% elif database is mapping %}
+  "{{ database.keys()[0] }}" \
+  "{{ database.values()[0] }}" \
+{% endif %}
+  "{{ backup_params.options.query_filter | default('') }}"
+{% endfor %}
+{% elif backup_params.type == 'mysqldump' %}
+{% for database in backup_params.options.databases %}
+make_operation {{ backup_params.type }} "{{ database }}"
+{% endfor %}
+{% endif %}
+
+if test -n "${backup_post_command}"; then
+  make_simple any "Run post_command '${backup_post_command}'" "${backup_post_command}"
+fi
+
+make_simple copy "Copy to remote storage" "${backup_rclone_remote}" "${backup_remote_age_days}" "${backup_sync_exclude}"
+
+make_simple delete "Delete remote older archives" "${backup_rclone_remote}" "${backup_remote_age_days}"
+make_simple delete_tmp "Delete unnecessary tmp files" "${backup_rclone_remote/-chunked/}"
+make_simple rmdirs "Delete remote empty directories" "${backup_rclone_remote/-chunked/}"
+
+if test -n "${backup_remote_cleanup}"; then
+  make_simple cleanup "Run a cleanup remote trash folder operation" "${backup_rclone_remote}"
+  make_simple about "Retrive information about an usage of remote storage" "${backup_rclone_remote}"
+fi
+
+popd >/dev/null
+
+echo "[!] Backup complete"
+echo

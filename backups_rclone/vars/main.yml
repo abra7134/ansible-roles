@@ -1,0 +1,6 @@
+---
+# The 'rclone' version to be installed
+_backups_rclone_version: 1.50.2
+
+# The 'rclone' debian-package URL download from
+_backups_rclone_deb_url: "https://downloads.rclone.org/v{{ _backups_rclone_version }}/rclone-v{{ _backups_rclone_version }}-linux-amd64.deb"
