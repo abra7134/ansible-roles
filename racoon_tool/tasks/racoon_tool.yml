@@ -28,6 +28,7 @@
     state: latest
   notify:
     - Stop 'racoon' service
+    - Disable 'racoon' service
 
 - name: Fix the 'racoon-tool' binary to support kernel 4.X versions
   lineinfile:

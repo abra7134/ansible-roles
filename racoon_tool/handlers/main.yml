@@ -1,9 +1,14 @@
 ---
 - name: Stop 'racoon' service
-  systemd:
-    enabled: no
+  service:
     name: racoon
     state: stopped
+
+# This operation is separated for correct shutdown the 'racoon' service
+- name: Disable 'racoon' service
+  service:
+    enabled: no
+    name: racoon
 
 - name: Restart 'racoon-tool' service
   systemd:
