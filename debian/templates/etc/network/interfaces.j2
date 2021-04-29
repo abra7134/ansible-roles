@@ -1,6 +1,6 @@
 {{ ansible_managed | comment }}
 {% macro bridge_ports(iface_params) %}
-{% if iface_params['bridge-ports'] is defined and iface_params['bridge-ports'] != None and iface_params['bridge-ports'] != "" %}
+{% if iface_params['bridge-ports'] is string and iface_params['bridge-ports'] != "" %}
        bridge-ports {{ iface_params['bridge-ports'] }}
        bridge-stp {{ iface_params['bridge-stp'] | default('off') }}
        bridge-fd {{ iface_params['bridge-fd'] | default(0) }}
@@ -14,19 +14,19 @@ iface lo inet loopback
 {% endfor %}
 
 {% for iface_name, iface_params in debian_network_interfaces.items() %}
-{% if iface_params['address'] is defined or iface_params['address6'] is defined %}
+{% if iface_params['address'] is string and iface_params['address'] != "" %}
 auto {{ iface_name }}
 iface {{ iface_name }} inet static
        address {{ iface_params['address'] }}
        netmask {{ iface_params['netmask'] | default('255.255.255.0') }}
-{% if iface_params['gateway'] is defined and iface_params['gateway'] != None and iface_params['gateway'] != "" %}
+{% if iface_params['gateway'] is string and iface_params['gateway'] != "" %}
        gateway {{ iface_params['gateway'] }}
 {% endif %}
-{% if iface_params['mac'] is defined and iface_params['mac'] != None and iface_params['mac'] != "" %}
+{% if iface_params['mac'] is string and iface_params['mac'] != "" %}
        hwaddress {{ iface_params['mac'] }}
 {% endif %}
 {{ bridge_ports(iface_params) }}
-{% if iface_params['routes'] is defined and iface_params['routes'] is sequence and iface_params['routes'] is not string %}
+{% if iface_params['routes'] is sequence and iface_params['routes'] is not string %}
 {% for iface_route in iface_params['routes'] %}
 {% if iface_route != None and iface_route != "" %}
 
@@ -35,17 +35,17 @@ iface {{ iface_name }} inet static
 {% endif %}
 {% endfor %}
 {% endif %}
-{% if iface_params['address6'] is defined and iface_params['address6'] != None and iface_params['address6'] != "" %}
+{% if iface_params['address6'] is string and iface_params['address6'] != "" %}
 
 iface {{ iface_name }} inet6 static
        address {{ iface_params['address6'] }}
        netmask {{ iface_params['netmask6'] | default(64) }}
-{% if iface_params['gateway6'] is defined and iface_params['gateway6'] != None and iface_params['gateway6'] != "" %}
+{% if iface_params['gateway6'] is string and iface_params['gateway6'] != "" %}
        gateway {{ iface_params['gateway6'] }}
 {% endif %}
 {% endif %}
 {% else %}
-{% if iface_params['bridge-ports'] is defined and iface_params['bridge-ports'] != None and iface_params['bridge-ports'] != "" %}
+{% if iface_params['bridge-ports'] is string and iface_params['bridge-ports'] != "" %}
 auto {{ iface_name }}
 {% endif %}
 iface {{ iface_name }} inet manual

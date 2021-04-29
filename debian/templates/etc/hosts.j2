@@ -1,7 +1,7 @@
 {{ ansible_managed | comment }}
 
 127.0.0.1 localhost.localdomain localhost
-{{ ansible_facts.default_ipv4.address }} {{ inventory_hostname }} {{ inventory_hostname.split('.')[0] }}
+{{ ansible_facts.default_ipv4.address | mandatory }} {{ inventory_hostname }} {{ inventory_hostname.split('.')[0] }}
 {% for ip, hostnames in debian_network_hosts.items() %}
 {{ ip }}  {{ ' '.join(hostnames) }}
 {% endfor %}
