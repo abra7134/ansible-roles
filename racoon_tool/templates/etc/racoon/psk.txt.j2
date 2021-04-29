@@ -1,7 +1,7 @@
 {{ ansible_managed | comment }}
 
 {% for host, preshared_key in racoon_tool_preshared_keys.items() %}
-{% if preshared_key is string %}
+{% if preshared_key | type_debug in ['string', 'AnsibleVaultEncryptedUnicode'] %}
 {{ host }}  {{ preshared_key }}
 {% endif %}
 {% endfor %}
