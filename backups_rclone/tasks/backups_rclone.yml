@@ -60,17 +60,20 @@
   - name: Install backups scripts and them systemd timer unit files
     template:
       src: "{{ item[1].strip('/') }}.j2"
-      dest: "{{ item[1] | replace('backups_rclone-', 'backups_rclone-%s' % (item[0])) }}"
+      dest: &script_dest "{{ item[1] | replace('backups_rclone-', 'backups_rclone-%s' % (item[0])) }}"
       mode: "{{ 0755 if item[1].endswith('.sh') else 0644 }}"
     loop: "{{ backups_rclone.keys() | product(['/opt/backups_rclone-.sh', '/etc/systemd/system/backups_rclone-.timer']) | list }}"
+    loop_control:
+      label: *script_dest
 
   - name: Activate and restart installed systemd timers
     systemd:
       daemon-reload: yes
       enabled: yes
-      name: "backups_rclone-{{ item }}.timer"
+      name: &service_name "backups_rclone-{{ item }}.timer"
       state: restarted
-    loop:
-      - backups_rclone.keys()
+    loop: "{{ backups_rclone.keys() | list }}"
+    loop_control:
+      label: *service_name
   tags:
     - backups_rclone_config
