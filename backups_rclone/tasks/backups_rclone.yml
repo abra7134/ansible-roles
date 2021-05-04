@@ -25,14 +25,20 @@
     state: latest
   check_mode: no
 
+- name: Fetch a package
+  get_url:
+    checksum: "{{ _backups_rclone_deb_checksum }}"
+    url: "{{ _backups_rclone_deb_url }}"
+    dest: "{{ _backups_rclone_deb_path }}"
+
 - name: Install packages
   apt:
-    deb: "{{ item if item.startswith('https://') else omit }}"
+    deb: "{{ item if item.startswith('/') else omit }}"
     dpkg_options: force-confdef,force-confold,skip-same-version
-    name: "{{ item if not item.startswith('https://') else omit }}"
-    state: present
+    name: "{{ item if not item.startswith('/') else omit }}"
+    state: "{{ 'present' if item.startswith('/') else 'latest' }}"
   loop:
-    - "{{ _backups_rclone_deb_url }}"
+    - "{{ _backups_rclone_deb_path }}"
     - fuse
     - squashfs-tools
   loop_control:

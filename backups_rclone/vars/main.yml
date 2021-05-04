@@ -2,5 +2,8 @@
 # The 'rclone' version to be installed
 _backups_rclone_version: 1.50.2
 
-# The 'rclone' debian-package URL download from
+# The 'rclone' debian-package URL download from and his checksum
 _backups_rclone_deb_url: "https://downloads.rclone.org/v{{ _backups_rclone_version }}/rclone-v{{ _backups_rclone_version }}-linux-amd64.deb"
+_backups_rclone_deb_checksum: "sha1:8b87564c1ad6257038a1016a36192c0b02912c60"
+# The 'rclone' deb-package download to
+_backups_rclone_deb_path: "/opt/{{ _backups_rclone_deb_url | basename }}"
