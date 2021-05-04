@@ -11,9 +11,15 @@
     state: latest
   check_mode: no
 
-- name: Install package
+- name: Fetch a package
+  get_url:
+    checksum: "{{ _telegraf_deb_checksum }}"
+    url: "{{ _telegraf_deb_url }}"
+    dest: "{{ _telegraf_deb_path }}"
+
+- name: Install the package
   apt:
-    deb: "{{ _telegraf_deb_url }}"
+    deb: "{{ _telegraf_deb_path }}"
     dpkg_options: force-confdef,force-confold,skip-same-version
     state: present
 

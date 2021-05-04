@@ -1,6 +1,9 @@
 ---
-# Telegraf version to be installed
+# The 'telegraf' version to be installed
 _telegraf_version: "0.12.1-1"
 
-# Telegraf URL download from
+# The 'telegraf' debian-package URL download from and his checksum
 _telegraf_deb_url: "https://dl.influxdata.com/telegraf/releases/telegraf_{{ _telegraf_version }}_amd64.deb"
+_telegraf_deb_checksum: "sha1:fa6c66dc7e185d117e19231b88869aa5b6ad5c7c"
+# The 'telegraf' deb-package download to
+_telegraf_deb_path: "/opt/{{ _telegraf_deb_url | basename }}"
