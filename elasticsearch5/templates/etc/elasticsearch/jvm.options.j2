@@ -1,0 +1,26 @@
+{{ ansible_managed | comment }}
+
+-server
+{% for item, value in elasticsearch5_jvm_options.items() %}
+{% if item[0] == "D" %}
+-{{ item }}={{ value | ternary('true', 'false') if value in [True, False] else value if value != None else "" }}
+{% elif item[0:2] == "XX" %}
+{% if value in [True, False] %}
+-{{ item[0:2] }}:{{ "+" if value == True else "-" }}{{ item[2:] }}
+{% elif value is string or value is number %}
+-{{ item[0:2] }}:{{ item[2:] }}={{ value }}
+{% endif %}
+{% elif item[0] == "X" %}
+{% if value == None %}
+-{{ item }}
+{% elif value is string or value is number %}
+{% if item in ["Xmn", "Xms", "Xmx", "Xss"] %}
+-{{ item }}{{ value }}
+{% elif item == "Xmaxjitcodesize" %}
+-{{ item }}={{ value }}
+{% else %}
+-{{ item }}:{{ value }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}

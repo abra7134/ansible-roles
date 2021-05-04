@@ -1,0 +1,9 @@
+---
+# The 'elasticsearch' version to be installed
+_elasticsearch5_version: 5.1.1
+
+# The 'elasticsearch' deb-package URL download from and his checksum
+_elasticsearch5_deb_url: "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{ _elasticsearch5_version }}.deb"
+_elasticsearch5_deb_checksum: "sha1:f2fdf6d2bdd6e526c5be53f859c4dd111677a4b6"
+# The 'elasticsearch' deb-package download to
+_elasticsearch5_deb_path: "/opt/{{ _elasticsearch5_deb_url | basename }}"

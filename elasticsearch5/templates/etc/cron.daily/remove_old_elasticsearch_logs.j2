@@ -1,0 +1,9 @@
+#!/bin/sh
+
+{{ ansible_managed | comment }}
+
+find \
+  /var/log/elasticsearch \
+  -name '*.log.gz' \
+  -mtime +{{ elasticsearch5_logs_keep_days }} \
+  -exec rm --verbose {} \;

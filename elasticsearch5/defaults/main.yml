@@ -1,0 +1,51 @@
+---
+# The 'elasticsearch' main configuration
+elasticsearch5_config: {}
+  # cluster.name: my-application
+  # node.name: node-1
+  # node.attr.rack: r1
+  # path.data: /path/to/data
+  # path.logs: /path/to/logs
+  # bootstrap.memory_lock: true
+  # network.host: 192.168.0.1
+  # http.port: 9200
+  # discovery.zen.ping.unicast.hosts: ["host1", "host2"]
+  # discovery.zen.minimum_master_nodes: 3
+  # gateway.recover_after_nodes: 3
+  # action.destructive_requires_name: true
+
+# The 'elasticsearch' JVM options
+elasticsearch5_jvm_options:
+  Xms: 2g
+  Xmx: 2g
+  XXUseConcMarkSweepGC: true
+  XXCMSInitiatingOccupancyFraction: 75
+  XXUseCMSInitiatingOccupancyOnly: true
+  XXDisableExplicitGC: true
+  XXAlwaysPreTouch: true
+  Xss: 1m
+  Djava.awt.headless: true
+  Dfile.encoding: UTF-8
+  Djna.nosys: true
+  Djdk.io.permissionsUseCanonicalPath: true
+  Dio.netty.noUnsafe: true
+  Dio.netty.noKeySetOptimization: true
+  Dlog4j.shutdownHookEnabled: false
+  Dlog4j2.disable.jmx: true
+  Dlog4j.skipJansi: true
+  XXHeapDumpOnOutOfMemoryError: true
+  # XXHeapDumpPath: ${heap.dump.path}
+  # XXPrintGCDetails: true
+  # XXPrintGCTimeStamps: true
+  # XXPrintGCDateStamps: true
+  # XXPrintClassHistogram: true
+  # XXPrintTenuringDistribution: true
+  # XXPrintGCApplicationStoppedTime: true
+  # Xloggc: ${loggc}
+  # Delasticsearch.json.allow_unquoted_field_names: true
+
+# How long keep elasticseach'es log files
+elasticsearch5_logs_keep_days: "31"
+
+# The 'elasticsearch' plugins to install
+elasticsearch5_plugins: []
