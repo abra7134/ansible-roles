@@ -1,0 +1,38 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    kibana_config is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Fetch a package
+  get_url:
+    checksum: "{{ _kibana_deb_checksum }}"
+    url: "{{ _kibana_deb_url }}"
+    dest: "{{ _kibana_deb_path }}"
+
+- name: Install the package
+  apt:
+    deb: "{{ _kibana_deb_path }}"
+    dpkg_options: force-confdef,force-confold,skip-same-version
+    state: present
+
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0644
+  loop:
+    - /etc/kibana/kibana.yml
+  notify:
+    - Restart 'kibana' service
+  tags:
+    - kibana_config
+
+- meta: flush_handlers

@@ -1,0 +1,32 @@
+---
+# The 'kibana' main configuration
+kibana_config: {}
+  # server.port: 5601
+  # server.host: localhost
+  # server.basePath: ""
+  # server.maxPayloadBytes: 1048576
+  # server.name: your-hostname
+  # elasticsearch.url: http://localhost:9200
+  # elasticsearch.preserveHost: true
+  # kibana.index: .kibana
+  # kibana.defaultAppId: discover
+  # elasticsearch.username: user
+  # elasticsearch.password: pass
+  # server.ssl.cert: /path/to/your/server.crt
+  # server.ssl.key: /path/to/your/server.key
+  # elasticsearch.ssl.cert: /path/to/your/client.crt
+  # elasticsearch.ssl.key: /path/to/your/client.key
+  # elasticsearch.ssl.ca: /path/to/your/CA.pem
+  # elasticsearch.ssl.verify: true
+  # elasticsearch.pingTimeout: 1500
+  # elasticsearch.requestTimeout: 30000
+  # elasticsearch.requestHeadersWhitelist: [ authorization ]
+  # elasticsearch.customHeaders: {}
+  # elasticsearch.shardTimeout: 0
+  # elasticsearch.startupTimeout: 5000
+  # pid.file: /var/run/kibana.pid
+  # logging.dest: stdout
+  # logging.silent: false
+  # logging.quiet: false
+  # logging.verbose: false
+  # ops.interval: 5000

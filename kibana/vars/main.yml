@@ -1,0 +1,9 @@
+---
+# The 'kibana' version to be installed
+_kibana_version: 5.1.1
+
+# The 'kibana' deb-package URL download from and his checksum
+_kibana_deb_url: "https://artifacts.elastic.co/downloads/kibana/kibana-{{ _kibana_version }}-amd64.deb"
+_kibana_deb_checksum: "sha1:3347b9fa181f63ddc3cf5eb2bf288f932e072cfe"
+# The 'kibana' deb-package download to
+_kibana_deb_path: "/opt/{{ _kibana_deb_url | basename }}"
