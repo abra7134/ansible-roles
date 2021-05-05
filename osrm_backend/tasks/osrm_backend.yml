@@ -18,12 +18,6 @@
   loop:
     - "{{ _osrm_backend_dir }}"
 
-- name: Copy and unpack binary archive
-  unarchive:
-    creates: "{{ _osrm_backend_dir }}/README.md"
-    src: "{{ _osrm_backend_binary_name }}"
-    dest: "{{ _osrm_backend_dir }}"
-
 - name: Install dependencies
   apt:
     name:
@@ -35,6 +29,12 @@
       - liblua5.2-0
       - libtbb2
     state: latest
+
+- name: Copy and unpack binary archive
+  unarchive:
+    creates: "{{ _osrm_backend_dir }}/README.md"
+    src: "{{ _osrm_backend_binary_name }}"
+    dest: "{{ _osrm_backend_dir }}"
 
 - name: Write configuration files
   template:
