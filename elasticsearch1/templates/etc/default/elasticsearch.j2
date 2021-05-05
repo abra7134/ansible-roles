@@ -1,0 +1,5 @@
+{{ ansible_managed | comment }}
+
+{% for param, value in elasticsearch1_defaults.items() %}
+{{ param | upper }}={{ value }}
+{% endfor %}

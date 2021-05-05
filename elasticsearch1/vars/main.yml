@@ -1,0 +1,9 @@
+---
+# The 'elasticsearch' version to be installed
+_elasticsearch1_version: 1.7.6
+
+# The 'elasticsearch' deb-package URL download from and his checksum
+_elasticsearch1_deb_url: "https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-{{ _elasticsearch1_version }}.deb"
+_elasticsearch1_deb_checksum: "sha1:b5a9fc32d1dee82fa1cf4db54fc09609028ef7a2"
+# The 'elasticsearch' deb-package download to
+_elasticsearch1_deb_path: "/opt/{{ _elasticsearch1_deb_url | basename }}"

@@ -1,0 +1,137 @@
+---
+# The 'elasticsearch' main configuration
+elasticsearch1_config: {}
+  # node.rack: ${RACK_ENV_VAR}
+  # cluster.name: elasticsearch
+  # node.name: "Franz Kafka"
+  # node.master: true
+  # node.data: true
+  # node.rack: rack314
+  # node.max_local_storage_nodes: 1
+  # index.number_of_shards: 5
+  # index.number_of_replicas: 1
+  # path.conf: /path/to/conf
+  # path.data: /path/to/data
+  # path.data: /path/to/data1,/path/to/data2
+  # path.work: /path/to/work
+  # path.logs: /path/to/logs
+  # path.plugins: /path/to/plugins
+  # plugin.mandatory: mapper-attachments,lang-groovy
+  # bootstrap.mlockall: true
+  # network.bind_host: 192.168.0.1
+  # network.publish_host: 192.168.0.1
+  # network.host: 192.168.0.1
+  # transport.tcp.port: 9300
+  # transport.tcp.compress: true
+  # http.port: 9200
+  # http.max_content_length: 100mb
+  # http.enabled: false
+  # gateway.type: local
+  # gateway.recover_after_nodes: 1
+  # gateway.recover_after_time: 5m
+  # gateway.expected_nodes: 2
+  # cluster.routing.allocation.node_initial_primaries_recoveries: 4
+  # cluster.routing.allocation.node_concurrent_recoveries: 2
+  # indices.recovery.max_bytes_per_sec: 20mb
+  # indices.recovery.concurrent_streams: 5
+  # discovery.zen.minimum_master_nodes: 1
+  # discovery.zen.ping.timeout: 3s
+  # discovery.zen.ping.multicast.enabled: false
+  # discovery.zen.ping.unicast.hosts: ["host1", "host2:port"]
+  # index.search.slowlog.threshold.query.warn: 10s
+  # index.search.slowlog.threshold.query.info: 5s
+  # index.search.slowlog.threshold.query.debug: 2s
+  # index.search.slowlog.threshold.query.trace: 500ms
+  # index.search.slowlog.threshold.fetch.warn: 1s
+  # index.search.slowlog.threshold.fetch.info: 800ms
+  # index.search.slowlog.threshold.fetch.debug: 500ms
+  # index.search.slowlog.threshold.fetch.trace: 200ms
+  # index.indexing.slowlog.threshold.index.warn: 10s
+  # index.indexing.slowlog.threshold.index.info: 5s
+  # index.indexing.slowlog.threshold.index.debug: 2s
+  # index.indexing.slowlog.threshold.index.trace: 500ms
+  # monitor.jvm.gc.young.warn: 1000ms
+  # monitor.jvm.gc.young.info: 700ms
+  # monitor.jvm.gc.young.debug: 400ms
+  # monitor.jvm.gc.old.warn: 10s
+  # monitor.jvm.gc.old.info: 5s
+  # monitor.jvm.gc.old.debug: 2s
+  # http.jsonp.enable: true
+
+# The 'elasticsearch' default options
+elasticsearch1_defaults: {}
+  # es_home: /usr/share/elasticsearch
+  # conf_dir: /etc/elasticsearch
+  # conf_file: $CONF_DIR/elasticsearch.yml
+  # data_dir: /var/lib/elasticsearch
+  # log_dir: /var/log/elasticsearch
+  # work_dir: /tmp/elasticsearch
+  # pid_dir: /var/run/elasticsearch
+  # es_heap_size: 2g
+  # es_heap_newsize:
+  # es_direct_size:
+  # es_java_opts:
+  # es_restart_on_upgrade: true
+  # es_gb_log_file: /var/log/elasticsearch/gc.log
+  # es_user: elasticsearch
+  # es_group: elasticsearch
+  # max_open_files: 65535
+  # max_locked_memory: unlimited
+  # max_map_count: 262144
+
+# The 'elasticsearch' logging configuration
+elasticsearch1_logging_config:
+  es.logger.level: INFO
+  rootLogger: ${es.logger.level}, console, file
+  logger:
+    action: DEBUG
+    com.amazonaws: WARN
+    org.apache.http: INFO
+    #gateway: DEBUG
+    #index.gateway: DEBUG
+    #indices.recovery: DEBUG
+    #discovery: TRACE
+    index.search.slowlog: TRACE, index_search_slow_log_file
+    index.indexing.slowlog: TRACE, index_indexing_slow_log_file
+  additivity:
+    index.search.slowlog: false
+    index.indexing.slowlog: false
+  appender:
+    console:
+      type: console
+      layout:
+        type: consolePattern
+        conversionPattern: "[%d{ISO8601}][%-5p][%-25c] %m%n"
+    file:
+      type: dailyRollingFile
+      file: ${path.logs}/${cluster.name}.log
+      datePattern: "'.'yyyy-MM-dd"
+      layout:
+        type: pattern
+        conversionPattern: "[%d{ISO8601}][%-5p][%-25c] %m%n"
+    #file:
+      #type: extrasRollingFile
+      #file: ${path.logs}/${cluster.name}.log
+      #rollingPolicy: timeBased
+      #rollingPolicy.FileNamePattern: ${path.logs}/${cluster.name}.log.%d{yyyy-MM-dd}.gz
+      #layout:
+        #type: pattern
+        #conversionPattern: "[%d{ISO8601}][%-5p][%-25c] %m%n"
+    index_search_slow_log_file:
+      type: dailyRollingFile
+      file: ${path.logs}/${cluster.name}_index_search_slowlog.log
+      datePattern: "'.'yyyy-MM-dd"
+      layout:
+        type: pattern
+        conversionPattern: "[%d{ISO8601}][%-5p][%-25c] %m%n"
+    index_indexing_slow_log_file:
+      type: dailyRollingFile
+      file: ${path.logs}/${cluster.name}_index_indexing_slowlog.log
+      datePattern: "'.'yyyy-MM-dd"
+      layout:
+        type: pattern
+        conversionPattern: "[%d{ISO8601}][%-5p][%-25c] %m%n"
+
+# The 'elasticsearch' plugins to install
+elasticsearch1_plugins: {}
+  # head: mobz/elasticsearch-head

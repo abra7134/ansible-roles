@@ -1,0 +1,83 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    elasticsearch1_config is not mapping                or
+    elasticsearch1_defaults is not mapping              or
+    elasticsearch1_logging_config is not mapping        or
+    elasticsearch1_plugins is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Fetch a package
+  get_url:
+    checksum: "{{ _elasticsearch1_deb_checksum }}"
+    url: "{{ _elasticsearch1_deb_url }}"
+    dest: "{{ _elasticsearch1_deb_path }}"
+
+- name: Install packages
+  apt:
+    deb: "{{ item if item.startswith('/') else omit }}"
+    dpkg_options: force-confdef,force-confold,skip-same-version
+    name: "{{ item if not item.startswith('/') else omit }}"
+    state: "{{ 'present' if item.startswith('/') else 'latest' }}"
+  loop:
+    - openjdk-8-jre-headless
+    - "{{ _elasticsearch1_deb_path }}"
+  loop_control:
+    label: "{{ item | basename }}"
+
+- name: Install plugins
+  shell:
+    chdir: /usr/share/elasticsearch
+    cmd: |
+      if ! bin/plugin --list | fgrep --silent {{ item.key }}
+      then
+        yes | bin/plugin install {{ item.value }}
+      fi
+  loop: "{{ elasticsearch1_plugins | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: __elasticsearch1_install_plugins
+  changed_when: "'Installed %s into' % (item.key) in __elasticsearch1_install_plugins.stdout"
+
+- name: Create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: elasticsearch
+    group: elasticsearch
+  loop: "{{ elasticsearch1_config['path.repo'] }}"
+  when:
+    - elasticsearch1_config["path.repo"] is defined
+    - elasticsearch1_config["path.repo"] is sequence
+    - elasticsearch1_config["path.repo"] is not string
+
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0644
+  loop:
+    - /etc/default/elasticsearch
+    - /etc/elasticsearch/elasticsearch.yml
+    - /etc/elasticsearch/logging.yml
+  notify:
+    - Restart 'elasticsearch' service
+  tags:
+    - elasticsearch1_config
+
+- name: Modify the systemd service configuration
+  include_tasks: elasticsearch1_systemd.yml
+  when:
+    - elasticsearch1_config["bootstrap.mlockall"] is defined
+    - elasticsearch1_config["bootstrap.mlockall"] == True
+  tags:
+    - elasticsearch1_systemd
+
+- meta: flush_handlers

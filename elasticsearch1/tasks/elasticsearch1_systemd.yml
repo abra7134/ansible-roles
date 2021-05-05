@@ -1,0 +1,17 @@
+---
+- name: "systemd : Create directory for systemd service settings"
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /etc/systemd/system/elasticsearch.service.d
+
+- name: "systemd : Write a systemd configuration"
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+  loop:
+    - /etc/systemd/system/elasticsearch.service.d/limitmemlock.conf
+  notify:
+    - Reload 'systemd'
+    - Restart 'elasticsearch' service

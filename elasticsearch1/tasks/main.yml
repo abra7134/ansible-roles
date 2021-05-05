@@ -1,0 +1,4 @@
+---
+- import_tasks: elasticsearch1.yml
+  tags:
+    - elasticsearch1

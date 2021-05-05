@@ -34,15 +34,16 @@
     label: "{{ item | basename }}"
 
 - name: Install plugins
-  shell: |
-    cd /usr/share/elasticsearch
-    if ! bin/elasticsearch-plugin list | fgrep --silent {{ item }}
-    then
-      echo "y" | bin/elasticsearch-plugin install {{ item }}
-    fi
+  shell:
+    chdir: /usr/share/elasticsearch
+    cmd: |
+      if ! bin/elasticsearch-plugin list | fgrep --silent {{ item }}
+      then
+        echo "y" | bin/elasticsearch-plugin install {{ item }}
+      fi
   loop: "{{ elasticsearch5_plugins }}"
   register: __elasticsearch5_install_plugins
-  changed_when: "'-> Installed {{ item }}' in __elasticsearch5_install_plugins.stdout"
+  changed_when: "'-> Installed %s' % (item) in __elasticsearch5_install_plugins.stdout"
 
 - name: Install a cron job for purging old log files
   template:
