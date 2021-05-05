@@ -1,0 +1,4 @@
+---
+- import_tasks: logstash.yml
+  tags:
+    - logstash

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+{{ ansible_managed | comment }}
+
+find \
+  /var/log/logstash \
+  -name '*.log.gz' \
+  -mtime +{{ logstash_logs_keep_days }} \
+  -exec rm --verbose {} \;

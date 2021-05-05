@@ -1,0 +1,67 @@
+---
+# The 'logstash' main configuration
+logstash_config:
+  # node.name: test
+  path.data: /var/lib/logstash
+  # pipeline.workers: 2
+  # pipeline.output.workers: 1
+  # pipeline.batch.size: 125
+  # pipeline.batch.delay: 5
+  # pipeline.unsafe_shutdown: false
+  path.config: /etc/logstash/conf.d
+  # config.string:
+  # config.test_and_exit: false
+  # config.reload.automatic: false
+  # config.reload.interval: 3
+  # config.debug: false
+  # path.queue:
+  # queue.page_capacity: 250mb
+  # queue.max_events: 0
+  # queue.max_bytes: 1024mb
+  # queue.checkpoint.acks: 1024
+  # queue.checkpoint.writes: 1024
+  # queue.checkpoint.interval: 1000
+  # http.host: "127.0.0.1"
+  # http.port: 9600-9700
+  # log.level: info
+  path.logs: /var/log/logstash
+  # path.plugins: []
+
+# The 'logstash' JVM options
+logstash_jvm_options:
+  Xms: 256m
+  Xmx: 1g
+  XXUseParNewGC: true
+  XXUseConcMarkSweepGC: true
+  XXCMSInitiatingOccupancyFraction: 75
+  XXUseCMSInitiatingOccupancyOnly: true
+  XXDisableExplicitGC: true
+  # Duser.language: en
+  # Duser.country: US
+  # Duser.variant:
+  # Djava.io.tmpdir: $HOME
+  Djava.awt.headless: true
+  Dfile.encoding: UTF-8
+  # Djna.nosys: true
+  XXHeapDumpOnOutOfMemoryError: true
+  # XXHeapDumpPath: ${LOGSTASH_HOME}/heapdump.hprof
+  # XXPrintGCDetails: true
+  # XXPrintGCTimeStamps: true
+  # XXPrintGCDateStamps: true
+  # XXPrintClassHistogram: true
+  # XXPrintTenuringDistribution: true
+  # XXPrintGCApplicationStoppedTime: true
+  # Xloggc: ${LS_GC_LOG_FILE}
+
+# How long keep logstash'es log files
+logstash_logs_keep_days: "31"
+
+# The 'logstash' plugins to install
+logstash_plugins: []
+
+# The 'logstash' pipelines configuration
+logstash_pipelines: {}
+  # name_of_pipeline:
+  #   input: []
+  #   filter: []
+  #   output: []

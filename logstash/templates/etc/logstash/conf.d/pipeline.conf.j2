@@ -1,0 +1,22 @@
+{% macro write_logstash_pipeline(values, indent=0) %}
+{% if values is mapping %}
+{% for param, value in values.items() %}
+{{ param | indent(width=indent, indentfirst=True) }} {
+{{ write_logstash_pipeline(value, indent+2) -}}
+{{ "}" | indent(width=indent, indentfirst=True) }}
+{% endfor %}
+{% elif values is sequence and values is not string %}
+{% for value in values %}
+{{ write_logstash_pipeline(value, indent) -}}
+{% endfor %}
+{% else %}
+{{ values | indent(width=indent, indentfirst=True) }}
+{% endif %}
+{% endmacro -%}
+
+{% for pipeline in ["input", "filter", "output"] %}
+{{ pipeline }} {
+{{ write_logstash_pipeline(item.value[pipeline], indent=2) -}}
+}
+
+{% endfor %}

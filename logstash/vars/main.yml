@@ -1,0 +1,9 @@
+---
+# The 'logstash' version to be installed
+_logstash_version: 5.1.1
+
+# The 'logstash' deb-package URL download from and his checksum
+_logstash_deb_url: "https://artifacts.elastic.co/downloads/logstash/logstash-{{ _logstash_version }}.deb"
+_logstash_deb_checksum: "sha1:9856eca0496bb9a6c28aceeb3c1d9335ad5aa6ed"
+# The 'logstash' deb-package download to
+_logstash_deb_path: "/opt/{{ _logstash_deb_url | basename }}"

@@ -1,0 +1,85 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    logstash_config is not mapping                or
+    logstash_jvm_options is not mapping           or
+    logstash_logs_keep_days is not string         or
+    logstash_plugins is string                    or
+    logstash_plugins is not sequence              or
+    logstash_pipelines is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Fetch a package
+  get_url:
+    checksum: "{{ _logstash_deb_checksum }}"
+    url: "{{ _logstash_deb_url }}"
+    dest: "{{ _logstash_deb_path }}"
+
+- name: Install packages
+  apt:
+    deb: "{{ item if item.startswith('/') else omit }}"
+    dpkg_options: force-confdef,force-confold,skip-same-version
+    name: "{{ item if not item.startswith('/') else omit }}"
+    state: "{{ 'present' if item.startswith('/') else 'latest' }}"
+  loop:
+    - openjdk-8-jre-headless
+    - "{{ _logstash_deb_path }}"
+  loop_control:
+    label: "{{ item | basename }}"
+
+- name: Install plugins
+  shell: |
+    cd /usr/share/logstash
+    if ! bin/logstash-plugin list | fgrep --silent {{ item }}
+    then
+      bin/logstash-plugin install {{ item }}
+    fi
+  loop: "{{ logstash_plugins }}"
+  register: __logstash_install_plugins
+  changed_when: "'-> Installed {{ item }}' in __logstash_install_plugins.stdout"
+
+- name: Install a cron job for purging old log files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0755
+  loop:
+    - /etc/cron.daily/remove_old_logstash_logs
+  tags:
+    - logstash_cron
+
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0644
+  loop:
+    - /etc/logstash/logstash.yml
+    - /etc/logstash/jvm.options
+    - /etc/logstash/log4j2.properties
+  notify:
+    - Restart 'logstash' service
+  tags:
+    - logstash_config
+
+- name: Write pipelines configurations
+  template:
+    src: etc/logstash/conf.d/pipeline.conf.j2
+    dest: &pipeline_dest "/etc/logstash/conf.d/{{ item.key }}.conf"
+    mode: 0644
+  loop: "{{ logstash_pipelines | dict2items }}"
+  loop_control:
+    label: *pipeline_dest
+  notify:
+    - Restart 'logstash' service
+  tags:
+    - logstash_config
+
+- meta: flush_handlers
