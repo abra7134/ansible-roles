@@ -1,0 +1,55 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    percona_mondodb_components is string                or
+    percona_mongodb_components is not sequence          or
+    percona_mongodb_config is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Fetch packages
+  get_url:
+    checksum: "{{ _percona_mongodb_deb_checksums[item] }}"
+    url: "{{ _percona_mongodb_deb_url }}"
+    dest: "{{ _percona_mongodb_deb_path }}"
+  loop: "{{ percona_mongodb_components }}"
+  loop_control:
+    label: "{{ _percona_mongodb_deb_path | basename }}"
+  when:
+    - _percona_mongodb_deb_checksums[item] is defined
+
+- name: Install dependencies
+  apt:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - libsasl2-2
+
+# Write in advance so that the installation already uses the desired configuration
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+  loop:
+    - /etc/mongod.conf
+  tags:
+    - percona_mongodb_config
+  notify:
+    - Restart 'mongod' service
+
+- name: Install packages
+  apt:
+    deb: "{{ _percona_mongodb_deb_path }}"
+    dpkg_options: force-confdef,force-confold,skip-same-version
+    state: present
+  loop: "{{ percona_mongodb_components }}"
+  loop_control:
+    label: "{{ _percona_mongodb_deb_path | basename }}"
+
+- meta: flush_handlers

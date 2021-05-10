@@ -1,0 +1,28 @@
+---
+dependencies:
+  - role: kernel_params
+    vars:
+      # Disable transparent hugepages
+      # https://docs.mongodb.com/manual/tutorial/transparent-huge-pages/
+      kernel_params_sysfs:
+        90-disable_transparent_hugepage:
+          kernel/mm/transparent_hugepage/enabled: never
+          kernel/mm/transparent_hugepage/defrag: never
+      # Configure sufficient file handles (fs.file-max), kernel pid limit (kernel.pid_max),
+      # and maximum threads per process (kernel.threads-max).
+      # https://docs.mongodb.com/manual/administration/production-checklist-operations/
+      kernel_params_sysctl:
+        90-set_limits_for_mongodb:
+          fs.file-max: 98000
+          kernel.pid_max: 64000
+          kernel.threads-max: 64000
+
+galaxy_info:
+  author: Maksim Lekomtsev <lekomtsev@unix-mastery.ru>
+  description: Role to configuration of 'Percona Server for MongoDB' package
+  license: MIT
+  min_ansible_version: 2.9  ## TODO <- Need to minimize
+  platforms:
+    - name: Debian
+      versions:
+        - stretch

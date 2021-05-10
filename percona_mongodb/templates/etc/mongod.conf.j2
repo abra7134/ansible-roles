@@ -1,0 +1,15 @@
+{{ ansible_managed | comment }}
+
+{% macro mongodb_write_params(params, indent=0) %}
+{% if params is mapping %}
+
+{% for param, value in params.items() if value != None %}
+{{ param | indent(width=indent, indentfirst=true) }}:{{ mongodb_write_params(value, indent+2) -}}
+{% endfor %}
+
+{% else %}
+ {{ params | ternary('true', 'false') if params in [True, False] else params }}
+{% endif %}
+{% endmacro -%}
+
+{{ mongodb_write_params(percona_mongodb_config) }}

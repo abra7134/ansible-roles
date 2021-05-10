@@ -1,0 +1,16 @@
+---
+# The 'percona server for mongodb' version to be installed
+_percona_mongodb_version: 3.2.22-3.13
+
+# The 'percona server for mongodb' deb-packages base URL download from and them checksums
+_percona_mongodb_deb_url: >-
+  {% set d, n, v, c = (ansible_facts.distribution_release | mandatory, 'percona-server-mongodb', _percona_mongodb_version, item) -%} {# item variable as component #}
+  https://downloads.percona.com/downloads/{{ n }}-{{ v[:3] }}/{{ n }}-{{ v }}/binary/debian/{{ d }}/x86_64/{{ n }}-{{ v[0]+v[2] }}-{{ c }}_{{ v }}.{{ d }}_amd64.deb
+_percona_mongodb_deb_checksums:
+  server: sha1:2b98a341ee32916b8af7ca70208663eab989b575
+  shell: sha1:48b759d51cd0071bf990311d4b7abca501a6c236
+  tools: sha1:969b56cb473505045d7309e94927bda2d1d04bfa
+  mongos: sha1:e1d33538c951ec0ed395c1d7e40f3ce84086b23a
+
+# The 'percona server for mongodb' deb-package download to
+_percona_mongodb_deb_path: "/opt/{{ _percona_mongodb_deb_url | basename }}"

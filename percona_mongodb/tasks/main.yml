@@ -1,0 +1,4 @@
+---
+- import_tasks: percona_mongodb.yml
+  tags:
+    - percona_mongodb
