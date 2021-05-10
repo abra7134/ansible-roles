@@ -33,10 +33,10 @@
 
 - name: Install packages
   apt:
-    deb: "{{ item if item.startswith('/') else omit }}"
+    deb: "{{ item.startswith('/') | ternary(item, omit) }}"
     dpkg_options: force-confdef,force-confold,skip-same-version
-    name: "{{ item if not item.startswith('/') else omit }}"
-    state: "{{ 'present' if item.startswith('/') else 'latest' }}"
+    name: "{{ item.startswith('/') | ternary(omit, item) }}"
+    state: "{{ item.startswith('/') | ternary('present', 'latest') }}"
   loop:
     - "{{ _backups_rclone_deb_path }}"
     - fuse
@@ -56,7 +56,7 @@
     template:
       src: "{{ item.strip('/') }}.j2"
       dest: "{{ item }}"
-      mode: "{{ 0755 if item.endswith('.sh') and not item.endswith('.inc.sh') else 0644 }}"
+      mode: "{{ (item.endswith('.sh') and not item.endswith('.inc.sh')) | ternary(0755, 0644) }}"
     loop:
       - /etc/systemd/system/backups_rclone@.service
       - /root/.config/rclone/rclone.conf
@@ -67,7 +67,7 @@
     template:
       src: "{{ item[1].strip('/') }}.j2"
       dest: &script_dest "{{ item[1] | replace('backups_rclone-', 'backups_rclone-%s' % (item[0])) }}"
-      mode: "{{ 0755 if item[1].endswith('.sh') else 0644 }}"
+      mode: "{{ item[1].endswith('.sh') | ternary(0755, 0644) }}"
     loop: "{{ backups_rclone.keys() | product(['/opt/backups_rclone-.sh', '/etc/systemd/system/backups_rclone-.timer']) | list }}"
     loop_control:
       label: *script_dest

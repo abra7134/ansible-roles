@@ -23,10 +23,10 @@
 
 - name: Install packages
   apt:
-    deb: "{{ item if item.startswith('/') else omit }}"
+    deb: "{{ item.startswith('/') | ternary(item, omit) }}"
     dpkg_options: force-confdef,force-confold,skip-same-version
-    name: "{{ item if not item.startswith('/') else omit }}"
-    state: "{{ 'present' if item.startswith('/') else 'latest' }}"
+    name: "{{ item.startswith('/') | ternary(omit, item) }}"
+    state: "{{ item.startswith('/') | ternary('present', 'latest') }}"
   loop:
     - openjdk-8-jre-headless
     - "{{ _elasticsearch5_deb_path }}"
