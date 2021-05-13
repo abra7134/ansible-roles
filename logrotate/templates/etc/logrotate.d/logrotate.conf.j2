@@ -1,0 +1,24 @@
+{{ ansible_managed | comment }}
+
+{% macro logrotate_write_params(params, indent=0) %}
+{% if params is mapping %}
+{% for param, values in params.items() %}
+{% if values is mapping and values | length > 0 %}
+{{ param | indent(width=indent, indentfirst=True) }} {
+{{ logrotate_write_params(values, indent=2) -}}
+{{ "}" | indent(width=indent, indentfirst=True) }}
+
+{% elif values is sequence and values is not string %}
+{{ param | indent(width=indent, indentfirst=True) }}
+{% for value in values %}
+{{ value | indent(width=indent+2, indentfirst=True) }}
+{% endfor %}
+{{ "endscript" | indent(width=indent, indentfirst=True) }}
+{% else %}
+{{ param | indent(width=indent, indentfirst=True) }}{{ " %s"|format(values) if values != None else "" }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endmacro -%}
+
+{{ logrotate_write_params(item.value) }}

@@ -1,0 +1,36 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    logrotate_configs is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Pin the actual version
+  copy:
+    content: |
+      Package: logrotate-*
+      Pin: version {{ _logrotate_version }}-*
+      Pin-Priority: 1001
+    dest: /etc/apt/preferences.d/00logrotate
+
+- name: Install a package
+  apt:
+    name: logrotate
+    state: latest
+
+- name: Write configuration files
+  template:
+    src: etc/logrotate.d/logrotate.conf.j2
+    dest: &logrotate_dest "/etc/logrotate.d/{{ item.key }}.conf"
+    validate: logrotate --debug %s
+  loop: "{{ logrotate_configs | dict2items}}"
+  loop_control:
+    label: *logrotate_dest
+  tags:
+    - logrotate_config
