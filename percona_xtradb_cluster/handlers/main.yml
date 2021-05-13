@@ -1,0 +1,11 @@
+---
+- name: Delete the password file from lookup module
+  delegate_to: localhost
+  file:
+    path: "{{ _percona_xtradb_cluster_root_password_file_path }}"
+    state: absent
+
+- name: Reload 'mysql' service
+  service:
+    name: mysql
+    state: reloaded

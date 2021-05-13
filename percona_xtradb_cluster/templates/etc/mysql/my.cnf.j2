@@ -1,0 +1,15 @@
+{% if item.value is mapping %}
+{% for section, params in item.value.items() %}
+{% if params is mapping %}
+[{{ section }}]
+{% for param, value in params.items() %}
+{% if value == None %}
+{{ param }}
+{% else %}
+{{ param }} = {{ value }}
+{% endif %}
+{% endfor %}
+
+{% endif %}
+{% endfor %}
+{% endif %}

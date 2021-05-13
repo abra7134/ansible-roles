@@ -1,0 +1,27 @@
+---
+dependencies:
+  - role: logrotate
+    vars:
+      logrotate_configs:
+        mysql-server:
+          /var/log/mysql/mysql.log /var/log/mysql/mysql-slow.log /var/log/mysql/error.log:
+            daily:
+            dateext:
+            rotate: 7
+            missingok:
+            create: 660 mysql adm
+            compress:
+            sharedscripts:
+            postrotate:
+              - test -x /usr/bin/mysqladmin || exit 0
+              - /usr/bin/mysqladmin --defaults-file=/etc/mysql/debian.cnf flush-logs
+
+galaxy_info:
+  author: Maksim Lekomtsev <lekomtsev@unix-mastery.ru>
+  description: Role to configuration of 'Percona XtraDB Cluster' package
+  license: MIT
+  min_ansible_version: 2.9  ## TODO <- Need to minimize
+  platforms:
+    - name: Debian
+      versions:
+        - stretch

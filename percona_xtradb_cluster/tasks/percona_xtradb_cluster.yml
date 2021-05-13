@@ -1,0 +1,113 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    percona_xtradb_cluster_configs is not mapping       or
+    percona_xtradb_cluster_databases is string          or
+    percona_xtradb_cluster_databases is not sequence    or
+    percona_xtradb_cluster_users is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Fetch packages
+  get_url:
+    checksum: "{{ item.value }}"
+    url: "{{ _percona_xtradb_cluster_deb_url }}"
+    dest: "{{ _percona_xtradb_cluster_deb_path }}"
+  loop: "{{ _percona_xtradb_cluster_deb_checksums | dict2items }}"
+  loop_control:
+    label: "{{ _percona_xtradb_cluster_deb_path | basename }}"
+
+- name: Install dependencies
+  apt:
+    name:
+      - libaio1
+      - libdbd-mysql-perl
+      - libnuma1
+      - iproute
+      - python-mysqldb
+      - rsync
+      - socat
+    state: latest
+
+- name: Install packages
+  apt:
+    deb: "{{ _percona_xtradb_cluster_deb_path }}"
+    dpkg_options: force-confdef,force-confold,skip-same-version
+    state: present
+  loop: "{{ _percona_xtradb_cluster_deb_checksums | dict2items }}"
+  loop_control:
+    label: "{{ _percona_xtradb_cluster_deb_path | basename }}"
+  register: __install_packages
+
+- name: Set database's root password
+  command:
+    cmd: >-
+      mysqladmin -u root password "{{ _percona_xtradb_cluster_root_password }}"
+  when:
+    - __install_packages is changed
+
+- name: Write .my.cnf with root password
+  template:
+    src: etc/mysql/my.cnf.j2
+    dest: /root/.my.cnf
+  loop:
+    - key: client
+      value:
+        client:
+          user: root
+          password: "{{ _percona_xtradb_cluster_root_password }}"
+  when:
+    - __install_packages is changed
+  notify:
+    - Delete the password file from lookup module
+
+- name: Commenting out the 'log_error' parameter for the properly syslog working
+  replace:
+    dest: /etc/mysql/my.cnf
+    regexp: "^log_error ="
+    replace: "#log_error ="
+  tags:
+    - percona_xtradb_cluster_config
+
+- name: Write configuration files
+  template:
+    src: etc/mysql/my.cnf.j2
+    dest: &dest_path "/etc/mysql/conf.d/{{ item.key }}.cnf"
+  loop: "{{ percona_xtradb_cluster_configs | dict2items }}"
+  loop_control:
+    label: *dest_path
+  notify:
+    - Reload 'mysql' service
+  tags:
+    - percona_xtradb_cluster_config
+
+- name: Create databases
+  mysql_db:
+    collation: utf8_general_ci
+    encoding: utf8
+    name: "{{ item }}"
+    state: present
+  loop: "{{ percona_xtradb_cluster_databases }}"
+  tags:
+    - percona_xtradb_cluster_databases
+
+- name: Add users
+  mysql_user:
+    name: &user_name "{{ item.value.username | default(item.key) }}"
+    host: "{{ item.value.host | default('localhost') }}"
+    password: "{{ item.value.password | default(omit) }}"
+    priv: "{{ item.value.privileges | default(item.value.username ~ '.*:all') }}"
+    state: present
+  loop: "{{ percona_xtradb_cluster_users | dict2items }}"
+  loop_control:
+    label: *user_name
+  tags:
+    - percona_xtradb_cluster_users
+
+- meta: flush_handlers

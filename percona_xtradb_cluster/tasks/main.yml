@@ -1,0 +1,4 @@
+---
+- import_tasks: percona_xtradb_cluster.yml
+  tags:
+    - percona_xtradb_cluster

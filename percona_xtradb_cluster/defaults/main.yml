@@ -1,0 +1,31 @@
+---
+# The 'Percona XtraDB Cluster' main configuration (placed in conf.d/ directory)
+percona_xtradb_cluster_configs: {}
+# For example - config will be write to conf.d/utf8.cnf:
+#  utf8:
+#    client:
+#      #
+#      # Default is Latin1, if you need UTF-8 set this (also in server section)
+#      #
+#      #default-character-set: utf8
+#
+#    mysqld:
+#      #
+#      # Default is Latin1, if you need UTF-8 set all this (also in client section)
+#      #
+#      #character-set-server: utf8
+#      #collation-server: utf8_general_ci
+#      #character_set_server: utf8
+#      #collation_server: utf8_general_ci
+
+# Databases to be created
+percona_xtradb_cluster_databases: []
+
+# Users to be added and granted specified privileges
+percona_xtradb_cluster_users: {}
+# For example:
+#  admin:
+#    host: localhost
+#    password: Passw0rd
+#    privileges: "*.*:USAGE"
+#    username: admin
