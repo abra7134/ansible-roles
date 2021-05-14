@@ -31,12 +31,12 @@
     state: latest
 
 # Write in advance so that the installation already uses the desired configuration
-- name: Write configuration files
+- name: Write the server configuration file
   template:
-    src: "{{ item.strip('/') }}.j2"
-    dest: "{{ item }}"
-  loop:
-    - /etc/mongod.conf
+    src: etc/mongod.conf.j2
+    dest: /etc/mongod.conf
+  when:
+    - percona_mongodb_components | select("equalto", "server") | list | count > 0
   tags:
     - percona_mongodb_config
   notify:
