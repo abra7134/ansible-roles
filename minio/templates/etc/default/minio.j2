@@ -1,0 +1,5 @@
+{{ ansible_managed | comment }}
+
+{% for param, value in minio_config.items() %}
+MINIO_{{ param | upper }}={{ value }}
+{% endfor %}

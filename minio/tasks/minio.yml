@@ -1,0 +1,163 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    minio_config is not mapping          or
+    minio_serve_dirs is string           or
+    minio_serve_dirs is not sequence     or
+    minio_buckets is string              or
+    minio_buckets is not sequence        or
+    minio_users is not mapping           or
+    minio_backend_config is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Fetch binaries
+  get_url:
+    checksum: "{{ item.value }}"
+    dest: "{{ _minio_binaries_path }}"
+    mode: 0755
+    url: "{{ _minio_binaries_url }}"
+  loop: "{{ _minio_binaries_checksums | dict2items }}"
+  loop_control:
+    label: "{{ _minio_binaries_path | basename }}"
+
+- name: Create binaries symlinks to '/usr/local/bin'
+  file:
+    dest: &symlink_path "/usr/local/bin/{{ item.key.split('.')[0] }}"
+    src: "{{ _minio_binaries_path }}"
+    state: link
+  loop: "{{ _minio_binaries_checksums | dict2items }}"
+  loop_control:
+    label: *symlink_path
+
+- name: Create a system group
+  group:
+    name: "{{ _minio_group }}"
+
+- name: Create a system user
+  user:
+    createhome: no
+    group: "{{ _minio_group }}"
+    home: /nonexistent
+    name: "{{ _minio_user }}"
+    shell: /usr/sbin/nologin
+
+- name: Create data directories
+  file:
+    group: "{{ _minio_group }}"
+    mode: 0750
+    path: &data_path "{{ item | urlsplit('path') | dirname }}"
+    owner: "{{ _minio_user }}"
+    state: directory
+  loop: "{{ minio_serve_dirs }}"
+  loop_control:
+    label: *data_path
+
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0644
+  loop:
+    - /etc/default/minio
+    - /etc/systemd/system/minio.service
+  notify:
+    - Reload 'systemd' daemon
+    - Restart 'minio' service
+  tags:
+    - minio_config
+
+- meta: flush_handlers
+
+- name: Pause 5 seconds for starting
+  pause:
+    seconds: 5
+
+- name: Setup access for client
+  command:
+    cmd: >-
+      mc config host add local http://localhost:9000 {{ minio_config.access_key }} {{ minio_config.secret_key }}
+  when:
+    - minio_config.access_key is defined
+    - minio_config.secret_key is defined
+  tags:
+    - minio_config
+
+- name: Setup backend
+  shell:
+    cmd: >-
+      set -o errexit;
+      {% for subitem, subvalue in minio_backend_config[item].items() if subvalue not in [None, ''] -%}
+      mc admin config set local {{ '%s %s=%s' % (item, subitem, subvalue | ternary('on', 'off') if subvalue in [True, False] else subvalue) }};
+      {% endfor -%}
+  loop: "{{ minio_backend_config | list }}"
+  notify:
+    - Restart 'minio' service
+  tags:
+    - minio_backend_config
+
+- name: Create buckets
+  command:
+    cmd:
+      mc mb --ignore-existing local/{{ item }}
+  run_once: yes
+  loop: "{{ minio_buckets }}"
+  tags:
+    - minio_buckets
+
+- name: Manage users
+  command:
+    cmd: >-
+      {% set password = minio_users[item]['password'] -%}
+      {% if password != None -%}
+      mc admin user add local {{ item }} {{ minio_users[item]['password'] }}
+      {% else -%}
+      mc admin user remove local {{ item }}
+      {% endif -%}
+  run_once: yes
+  loop: "{{ minio_users | list }}"
+  tags:
+    - minio_users
+
+- name: Create policies files
+  copy:
+    content: "{{ minio_users[item]['policy'] | to_json }}"
+    dest: "/tmp/{{ item }}.minio_policy"
+  run_once: yes
+  loop: "{{ minio_users | list }}"
+  when:
+    - minio_users[item]['policy'] != None
+  tags:
+    - minio_users
+
+- name: Manage policies
+  command:
+    cmd: >-
+      {% if minio_users[item]['policy'] != None -%}
+      mc admin policy add local {{ item }} "/tmp/{{ item }}.minio_policy"
+      {% else -%}
+      mc admin policy remove local {{ item }}
+      {% endif -%}
+  run_once: yes
+  loop: "{{ minio_users | list }}"
+  tags:
+    - minio_users
+
+- name: Set policies on users
+  command:
+    cmd: >-
+      mc admin policy set local {{ item }} user={{ item }}
+  run_once: yes
+  loop: "{{ minio_users | list }}"
+  when:
+    - minio_users[item]['policy'] != None
+  tags:
+    - minio_users
+
+- meta: flush_handlers

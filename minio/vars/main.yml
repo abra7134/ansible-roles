@@ -1,0 +1,15 @@
+---
+# The 'minio' client and server binary names, versions, URL download from and them checksums
+_minio_client_version: RELEASE.2020-06-26T19-56-55Z
+_minio_server_version: RELEASE.2020-07-02T00-15-09Z
+_minio_binaries_url: >-
+  {% set cc, c = (item.key.startswith('mc.') | ternary('client/mc', 'server/minio'), item.key) %}
+  https://dl.min.io/{{ cc }}/release/linux-amd64/archive/{{ c }}
+_minio_binaries_checksums:
+  mc.{{ _minio_client_version }}: sha1:616f355c13408de3ec8be8f40086da21ade19e02
+  minio.{{ _minio_server_version }}: sha1:2ebc9099a1896899bf40a017a3c33c3d9e0e48af
+_minio_binaries_path: "/opt/{{ _minio_binaries_url | basename }}"
+
+# The linux user and group created for 'minio'
+_minio_user: minio
+_minio_group: minio
