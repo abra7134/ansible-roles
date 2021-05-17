@@ -1,0 +1,22 @@
+---
+dependencies:
+  - role: app_deploy
+    vars:
+      app_deploy_from: "{{ _elasticdump_dist_url }}"
+      app_deploy_from_archive_checksum: "{{ _elasticdump_dist_checksum }}"
+      app_deploy_prepare_via: npm
+      app_deploy_prepare_npm_use_nvm_nodejs_version: 4.3.2
+      app_deploy_to_dir: "{{ _elasticdump_dist_dir }}"
+      app_deploy_version: "{{ _elasticdump_version }}"
+
+galaxy_info:
+  author: Maksim Lekomtsev <lekomtsev@unix-mastery.ru>
+  description: Role to configuration of 'elasticdump' package
+  license: MIT
+  min_ansible_version: 2.9  ## TODO <- Need to minimize
+  platforms:
+    - name: Debian
+      versions:
+        - jessie
+        - stretch
+        - buster

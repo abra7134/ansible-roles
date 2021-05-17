@@ -1,0 +1,4 @@
+---
+- import_tasks: elasticdump.yml
+  tags:
+    - elasticdump

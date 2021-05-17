@@ -1,0 +1,10 @@
+---
+# The 'elasticdump' version to be installed
+_elasticdump_version: 2.0.1
+
+# The 'elasticdump' distribution URL download from and his checksum
+_elasticdump_dist_url: "https://github.com/taskrabbit/elasticsearch-dump/archive/v{{ _elasticdump_version }}.tar.gz"
+_elasticdump_dist_checksum: sha1:09b911ca88594d6bde3d45680459a47b2eb6dab1
+
+# The 'elasticdump' distribution unarchive to
+_elasticdump_dist_dir: "/opt/elasticdump"

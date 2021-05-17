@@ -1,0 +1,10 @@
+---
+- name: Install a global 'elasticdump' wrapper command to /usr/local/bin
+  copy:
+    content: |
+      #!/bin/sh
+
+      cd {{ _elasticdump_dist_dir }}/current
+      {{ _nvm_dir }}/nvm-exec {{ _elasticdump_dist_dir }}/current/bin/elasticdump "${@}"
+    dest: /usr/local/bin/elasticdump
+    mode: 0755
