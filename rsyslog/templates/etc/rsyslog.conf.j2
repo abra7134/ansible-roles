@@ -24,7 +24,7 @@ else {
 {% if value is mapping %}
 {% for subparam, subvalue in value.items() %}
 {{ "\n  " if values_count > 1 else "" -}}
-{{ subparam }}="{{ subvalue | ternary('on', 'no') if subvalue in [True, False] else subvalue }}"
+{{ subparam }}="{{ subvalue | ternary('on', 'no') if subvalue is boolean else subvalue }}"
 {%- endfor %}
 {% endif %}
 {% endfor %}

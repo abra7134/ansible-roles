@@ -8,7 +8,7 @@
 {% endfor %}
 
 {% else %}
- {{ params | ternary('true', 'false') if params in [True, False] else params }}
+ {{ params | ternary('true', 'false') if params is boolean else params }}
 {% endif %}
 {% endmacro -%}
 

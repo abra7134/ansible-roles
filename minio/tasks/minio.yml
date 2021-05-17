@@ -94,7 +94,7 @@
     cmd: >-
       set -o errexit;
       {% for subitem, subvalue in minio_backend_config[item].items() if subvalue not in [None, ''] -%}
-      mc admin config set local {{ '%s %s=%s' % (item, subitem, subvalue | ternary('on', 'off') if subvalue in [True, False] else subvalue) }};
+      mc admin config set local {{ '%s %s=%s' % (item, subitem, subvalue | ternary('on', 'off') if subvalue is boolean else subvalue) }};
       {% endfor -%}
   loop: "{{ minio_backend_config | list }}"
   notify:

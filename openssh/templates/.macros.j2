@@ -6,7 +6,7 @@
 {{ param | indent(width=indent, indentfirst=true) }} {{ value }}
 {% endfor %}
 {% else %}
-{{ param | indent(width=indent, indentfirst=true) }} {{ values | ternary("yes", "no") if values in [True, False] else values }}
+{{ param | indent(width=indent, indentfirst=true) }} {{ values | ternary("yes", "no") if values is boolean else values }}
 {% endif %}
 {% endif %}
 {% endfor %}

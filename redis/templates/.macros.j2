@@ -5,7 +5,7 @@
 {% for subvalue in value %}
 {{ param }} {{ subvalue }}
 {% endfor %}
-{% elif value in [True, False] %}
+{% elif value is boolean %}
 {{ param }} {{ value | ternary("yes", "no") }}
 {% else %}
 {{ param }} {{ value | default('""', true) }}

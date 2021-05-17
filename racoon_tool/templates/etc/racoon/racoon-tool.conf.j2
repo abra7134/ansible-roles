@@ -4,7 +4,7 @@
 {% if params is mapping %}
 {{ section }}:
 {% for param, value in params.items() %}
-{% if value in [True, False] %}
+{% if value is boolean %}
   {{ param }}: {{ value | ternary('yes', 'no') }}
 {% else %}
   {{ param }}: {{ value }}
