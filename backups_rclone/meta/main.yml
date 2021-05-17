@@ -1,5 +1,8 @@
 ---
-dependencies: []
+dependencies:
+  - role: elasticdump
+    when:
+      - backups_rclone | dict2items | map(attribute='value.type') | select('equalto', 'elasticdump') | list | count > 0
 
 galaxy_info:
   author: Maksim Lekomtsev <lekomtsev@unix-mastery.ru>
