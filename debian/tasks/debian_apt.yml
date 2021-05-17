@@ -1,5 +1,5 @@
 ---
-- name: Write APT's configuration files
+- name: "apt : Write configuration files"
   template:
     src: "{{ item.strip('/') }}.j2"
     dest: "{{ item }}"
@@ -8,7 +8,7 @@
     - /etc/apt/sources.list
     - /etc/apt/apt.conf.d/02proxy
 
-- name: Update APT's cache and packages
+- name: "apt : Update cache and packages"
   apt:
     autoremove: yes
     cache_valid_time: 86400 # 1 day
@@ -16,7 +16,7 @@
     update_cache: yes
     upgrade: full
 
-- name: Install additional packages
+- name: "apt : Install additional packages"
   apt:
     name: "{{ debian_packages }}"
     state: latest

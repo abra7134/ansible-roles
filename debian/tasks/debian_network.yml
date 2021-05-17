@@ -1,11 +1,11 @@
 ---
-- name: Set hostname
+- name: "network : Set hostname"
   hostname:
     name: "{{ inventory_hostname }}"
   tags:
     - debian_network_hostname
 
-- name: Write network configuration files
+- name: "network : Write network configuration files"
   template:
     src: "{{ item.strip('/') }}.j2"
     dest: "{{ item }}"
