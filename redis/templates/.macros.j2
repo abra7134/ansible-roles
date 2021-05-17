@@ -1,0 +1,15 @@
+{% macro redis_write_config(params) %}
+{% if params is mapping %}
+{% for param, value in params.items() %}
+{% if value is sequence and value is not string %}
+{% for subvalue in value %}
+{{ param }} {{ subvalue }}
+{% endfor %}
+{% elif value in [True, False] %}
+{{ param }} {{ value | ternary("yes", "no") }}
+{% else %}
+{{ param }} {{ value | default('""', true) }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endmacro %}

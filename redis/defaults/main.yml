@@ -1,0 +1,164 @@
+---
+# Install and use redis-sentinel or not
+redis_sentinel_use: False
+
+# The 'redis-sentinel' main configuration
+# Full description see in dist/sentinel-VERSION.conf.sample
+redis_sentinel_config:
+  # Configuration values will write in /etc/redis/sentinel.conf
+  # Write at once when is first installation of redis-sentinel
+  persistent:
+    daemonize: yes
+    pidfile: /var/run/redis/redis-sentinel.pid
+    logfile: /var/log/redis/redis-sentinel.log
+    #bind: 127.0.0.1 192.168.1.1
+    port: 26379
+    #"sentinel announce-ip": <ip>
+    #"sentinel announce-port": <port>
+    dir: /var/lib/redis
+
+  # Masters for monitoring by Redis-sentinel
+  # Updated every time as a ansible script is running
+  masters: {}
+    # common-master:
+    #   monitor: 127.0.0.1 6379 2
+    #   down-after-milliseconds: 60000
+    #   failover-timeout: 180000
+    #   parallel-syncs: 1
+
+# Make a Redis instance a copy of another Redis server
+# For bootstraping only (run at once on first installation)
+redis_slaveof_host: ""
+redis_slaveof_port: 6379
+
+# The 'redis' main configuration
+# Full description see in dist/redis-VERSION.conf.sample
+redis_config:
+  # Configuration values will write in /etc/redis/redis.conf and they won't be set by 'config set' command
+  # Write at once when is first installation of redis-server
+  persistent:
+    ############################# INCLUDES ######################################
+    #include:
+    #  - /path/to/local.conf
+    #  - /path/to/other.conf
+
+    ############################# NETWORK #######################################
+    bind: 127.0.0.1
+    port: 6379
+    tcp-backlog: 511
+    #unixsocket: /var/run/redis/redis.sock
+    #unixsocketperm: 700
+
+    ############################# GENERAL #######################################
+    daemonize: yes
+    supervised: no
+    pidfile: /var/run/redis/redis-server.pid
+    logfile: /var/log/redis/redis-server.log
+    #syslog-enabled: no
+    #syslog-ident: redis
+    #syslog-facility: local0
+    databases: 16
+
+    ############################# SNAPSHOTTING ##################################
+    rdbchecksum: yes
+    dir: /var/lib/redis
+
+    ############################# SECURITY ######################################
+    #rename-command: []
+
+    ############################# APPEND ONLY MODE ##############################
+    appendfilename: appendonly.aof
+
+    ############################# REDIS CLUSTER #################################
+    #cluster-enabled: yes
+    #cluster-config-file: nodes-6379.conf
+
+  # Configuration set in realtime by 'config set' command
+  realtime:
+    ############################# NETWORK #######################################
+    protected-mode: yes
+    timeout: 0
+    tcp-keepalive: 300
+
+    ############################# GENERAL #######################################
+    loglevel: notice
+
+    ############################# SNAPSHOTTING ##################################
+    save:
+      - 900 1
+      - 300 10
+      - 60 10000
+    stop-writes-on-bgsave-error: yes
+    rdbcompression: yes
+    dbfilename: dump.rdb
+
+    ############################# REPLICATION ###################################
+    #slaveof: <masterip> <masterport>
+    #masterauth: <master-password>
+    slave-serve-stale-data: yes
+    slave-read-only: yes
+    repl-diskless-sync: no
+    repl-diskless-sync-delay: 5
+    #repl-ping-slave-period: 10
+    #repl-timeout: 60
+    repl-disable-tcp-nodelay: no
+    #repl-backlog-size: 1048576 # 1mb
+    #repl-backlog-ttl: 3600
+    slave-priority: 100
+    #min-slaves-to-write: 0
+    #min-slaves-max-lag: 10
+    #slave-announce-ip: 5.5.5.5
+    #slave-announce-port: 1234
+
+    ############################# SECURITY ######################################
+    #requirepass: foobared
+
+    ############################# LIMITS ########################################
+    #maxclients: 10000
+    #maxmemory: <bytes>
+    #maxmemory-policy: noeviction
+    #maxmemory-samples: 5
+
+    ############################# APPEND ONLY MODE ##############################
+    appendonly: no
+    appendfsync: everysec
+    no-appendfsync-on-rewrite: no
+    auto-aof-rewrite-percentage: 100
+    auto-aof-rewrite-min-size: 67108864 # 64mb
+    aof-load-truncated: yes
+
+    ############################# LUA SCRIPTING #################################
+    lua-time-limit: 5000
+
+    ############################# REDIS CLUSTER #################################
+    #cluster-node-timeout: 15000
+    #cluster-slave-validity-factor: 10
+    #cluster-migration-barrier: 1
+    #cluster-require-full-coverage: yes
+
+    ############################# SLOW LOG ######################################
+    slowlog-log-slower-than: 10000
+    slowlog-max-len: 128
+
+    ############################# LATENCY MONITOR ###############################
+    latency-monitor-threshold: 0
+
+    ############################# EVENT NOTIFICATION ############################
+    notify-keyspace-events: ""
+
+    ############################# ADVANCED CONFIG ###############################
+    hash-max-ziplist-entries: 512
+    hash-max-ziplist-value: 64
+    list-max-ziplist-size: -2
+    list-compress-depth: 0
+    set-max-intset-entries: 512
+    zset-max-ziplist-entries: 128
+    zset-max-ziplist-value: 64
+    hll-sparse-max-bytes: 3000
+    activerehashing: yes
+    client-output-buffer-limit:
+      - normal 0 0 0
+      - slave 268435456 67108864 60 # 256mb 64mb 60
+      - pubsub 33554432 8388608 60 # 32mb 8mb 60
+    hz: 10
+    aof-rewrite-incremental-fsync: yes

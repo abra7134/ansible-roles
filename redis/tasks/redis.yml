@@ -1,0 +1,91 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    redis_sentinel_use is not boolean      or
+    redis_sentinel_config is not mapping   or
+    redis_slaveof_host is not string       or
+    redis_slaveof_port is not number       or
+    redis_config is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Install 'python-redis' for work this Ansible role
+  apt:
+    name: python-redis
+    state: latest
+
+- name: Pin the actual version
+  copy:
+    content: |
+      Package: redis-*
+      Pin: version {{ _redis_version }}-*
+      Pin-Priority: 1001
+    dest: /etc/apt/preferences.d/00redis
+
+- name: Install 'redis-server' (and 'redis-tools' automatically)
+  apt:
+    name: redis-server
+    state: latest
+  notify:
+    # Write once because redis-server will overwrite own config ('config save' command)
+    - Write '/etc/redis/redis.conf'
+    # And set slaveof also at once, because sentinel will overwrite this settings
+    - Set server 'slaveof'
+    # And set main password
+    - Set server 'requirepass'
+
+- name: Install 'redis-sentinel'
+  apt:
+    name: redis-sentinel
+    state: latest
+  when:
+    - redis_sentinel_use
+  notify:
+    # Write once because redis-sentinel will overwrite own config automatically
+    - Write '/etc/redis/sentinel.conf'
+
+- meta: flush_handlers
+
+- name: Set 'redis-server' realtime configuration
+  redis:
+    command: config
+    login_password: "{{ redis_config.realtime.requirepass | default(omit) }}"
+    login_port: "{{ redis_config.persistent.port | default(6379) }}"
+    name: "{{ item.key }}"
+    value: "{{ item.value | join(' ') if item.value is sequence and item.value is not string else item.value | ternary('yes', 'no') if item.value is boolean else item.value }}"
+  loop: "{{ redis_config.realtime | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  notify:
+    - Run 'redis-cli config rewrite'
+  tags:
+    - redis_config
+
+- name: Set 'redis-sentinel' masters configuration
+  command:
+    cmd: >-
+      redis-cli
+      -p {{ redis_sentinel_config.persistent.port | default('26379') }}
+      sentinel
+      {% if item[1] == "monitor" %}
+      {{ item[1] }} {{ item[0] }}
+      {% else %}
+      set {{ item[0] }} {{ item[1] }}
+      {% endif %}
+      {{ redis_sentinel_config['masters'][item[0]][item[1]] }}
+  when:
+    - redis_sentinel_use
+    - item[1] in redis_sentinel_config['masters'][item[0]]
+  loop: "{{ redis_sentinel_config.masters | product(['auth-pass', 'down-after-milliseconds', 'failover-timeout', 'monitor', 'parallel-syncs']) | list }}"
+  loop_control:
+    label: "{{ item[0] }} -> {{ item[1] }}"
+  tags:
+    - redis_sentinel_config
+
+- meta: flush_handlers

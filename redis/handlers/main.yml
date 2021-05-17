@@ -1,0 +1,53 @@
+---
+- name: Write '/etc/redis/redis.conf'
+  template:
+    src: etc/redis/redis.conf.j2
+    dest: /etc/redis/redis.conf
+    group: redis
+    owner: redis
+    mode: 0640
+  notify: Restart 'redis-server' service
+
+- name: Restart 'redis-server' service
+  service:
+    name: redis-server
+    state: restarted
+
+- name: Set server 'slaveof'
+  redis:
+    command: slave
+    login_port: "{{ redis_config.persistent.port | default(6379) }}"
+    master_host: "{{ redis_slaveof_host }}"
+    master_port: "{{ redis_slaveof_port }}"
+  when:
+    - redis_slaveof_host != ""
+
+- name: Set server 'requirepass'
+  redis:
+    command: config
+    name: requirepass
+    value: "{{ redis_config.realtime.requirepass }}"
+  when:
+    - redis_config.realtime.requirepass is defined
+    - redis_config.realtime.requirepass != ""
+
+- name: Write '/etc/redis/sentinel.conf'
+  template:
+    src: etc/redis/sentinel.conf.j2
+    dest: /etc/redis/sentinel.conf
+    group: redis
+    owner: redis
+    mode: 0640
+  notify: Restart 'redis-sentinel' service
+
+- name: Restart 'redis-sentinel' service
+  service:
+    name: redis-sentinel
+    state: restarted
+
+- name: Run 'redis-cli config rewrite'
+  command:
+    cmd: >-
+      redis-cli
+      -p {{ redis_config.persistent.port | default('6379') }}
+      config rewrite

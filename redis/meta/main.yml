@@ -1,0 +1,29 @@
+---
+dependencies:
+  - role: kernel_params
+    vars:
+      # A Transparent Huge Pages (THP) will create latency and memory usage issues with Redis.
+      # To fix this issue is recommended its disable
+      kernel_params_sysfs:
+        90-disable_transparent_hugepage:
+          kernel/mm/transparent_hugepage/enabled: never
+          kernel/mm/transparent_hugepage/defrag: never
+
+      kernel_params_sysctl:
+        # Background save may fail under low memory condition.
+        # To fix this issue add 'vm.overcommit_memory = 1'
+        90-set_overcommit_memory:
+          vm.overcommit_memory: 1
+        # The TCP backlog setting cannot be less then /proc/sys/net/core/somaxconn
+        90-set_net_core_somaxconn:
+          net.core.somaxconn: "{{ redis_config['persistent']['tcp-backlog'] }}"
+
+galaxy_info:
+  author: Maksim Lekomtsev <lekomtsev@unix-mastery.ru>
+  description: Role to configuration of 'redis' package
+  license: MIT
+  min_ansible_version: 2.9  ## TODO <- Need to minimize
+  platforms:
+    - name: Debian
+      versions:
+        - stretch

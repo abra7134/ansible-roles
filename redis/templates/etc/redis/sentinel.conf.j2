@@ -1,0 +1,6 @@
+{{ ansible_managed | comment }}
+{% from ".macros.j2" import redis_write_config with context -%}
+
+# Sentinel configuration file (persistent part writed once at deployment)
+{{ redis_write_config(redis_sentinel_config.persistent) }}
+
