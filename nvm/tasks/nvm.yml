@@ -1,0 +1,38 @@
+---
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ _nvm_archive_dir }}"
+    - "{{ _nvm_dir }}"
+
+- name: Fetch an archive
+  get_url:
+    checksum: "{{ _nvm_archive_checksum }}"
+    url: "{{ _nvm_archive_url }}"
+    dest: "{{ _nvm_archive_path }}"
+
+- name: Unpack the archive
+  unarchive:
+    creates: "{{ _nvm_archive_dir }}/nvm.sh"
+    extra_opts: --strip-components=1
+    src: "{{ _nvm_archive_path }}"
+    dest: "{{ _nvm_archive_dir }}"
+    remote_src: yes
+
+- name: Create symlinks to working directory
+  file:
+    src: "{{ _nvm_archive_dir }}/{{ item }}"
+    dest: "{{ _nvm_dir }}/{{ item }}"
+    state: link
+    force: yes
+  loop:
+    - nvm-exec
+    - nvm.sh

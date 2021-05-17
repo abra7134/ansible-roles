@@ -1,0 +1,12 @@
+---
+# The 'nvm' version to be installed
+_nvm_version: 0.33.5
+
+# The 'nvm' source URL download from, his checksum, path to file to download to, and directory to unpack to
+_nvm_archive_url: "https://github.com/creationix/nvm/archive/v{{ _nvm_version }}.tar.gz"
+_nvm_archive_checksum: "sha1:15213620bab94c20d529fbaeb2e6dd8d16f6ea45"
+_nvm_archive_path: "/opt/nvm-{{ _nvm_archive_url | basename }}"
+_nvm_archive_dir: "/opt/nvm-{{ _nvm_version }}"
+
+# The 'nvm' working directory
+_nvm_dir: "/opt/nvm"
