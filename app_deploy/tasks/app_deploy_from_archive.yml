@@ -1,0 +1,38 @@
+---
+- name: "from_archive : Ensure 'version' folder exist"
+  file:
+    path: "{{ _app_deploy_version_dir }}"
+    state: directory
+
+- name: "from_archive : Download application archive file"
+  get_url:
+    checksum: "{{ app_deploy_from_archive_checksum | default(omit) }}"
+    dest: "{{ _app_deploy_version_dir }}/{{ app_deploy_from | basename }}"
+    headers: "{{ app_deploy_from_archive_http_get_params }}"
+    mode: 0644
+    url: "{{ app_deploy_from }}"
+    url_username: "{{ app_deploy_from_archive_http_username | default(omit) }}"
+    url_password: "{{ app_deploy_from_archive_http_password | default(omit) }}"
+
+- name: "from_archive : Install archiver if needed"
+  apt:
+    name: "{{ _app_deploy_from_archive_utils[app_deploy_from.split('.')[-1]] }}"
+    state: latest
+
+- name: "from_archive : Unpack the application archive"
+  command:
+    cmd: >-
+      tar
+      --extract
+      --strip-components={{ app_deploy_from_archive_strip_components | default(1) }}
+      --file {{ app_deploy_from | basename }}
+    chdir: "{{ _app_deploy_version_dir }}"
+    creates: README.md
+    warn: no
+  when:
+    - app_deploy_from.endswith(('.tar.bz2', '.tar.gz', '.tar.xz'))
+
+- name: "from_archive : Remove application archive file"
+  file:
+    path: "{{ _app_deploy_version_dir }}/{{ app_deploy_from | basename }}"
+    state: absent

@@ -1,0 +1,65 @@
+---
+# Application URL, deploy from (via selected method and version)
+app_deploy_from: ""
+app_deploy_via: archive
+app_deploy_version: "{{ ansible_date_time.iso8601 }}"
+# Deploy to (application's home directory)
+app_deploy_to_dir: /opt/my-app
+
+# Subdirs names (relative to app_deploy_to_dir) for releases, shared elements and current version folders
+app_deploy_releases_dirname: releases
+app_deploy_shared_dirname: shared
+app_deploy_current_dirname: current
+# Create current subdir via selected method
+app_deploy_current_via: symlink
+
+# Shared elements (relative paths)
+app_deploy_shared_paths: []
+# Link shared elements via selected method
+app_deploy_shared_via: symlink_directories
+
+# Additional configuration files paths (path will be replaced symbols '__' to '/' and striped '.j2' extension)
+app_deploy_prepare_configs_paths: []
+#  - "{{ '%s/group_vars/.templates/common__config__baseconf.php.j2' % inventory_dir }}"
+#
+# Definition state of files
+app_deploy_prepare_states: {}
+#  "web/index-test.php": { "state": "absent" }
+#  "runtime": { "mode": 775 }
+#  "tmp": { "owner": "www-data", "mode": 775 }
+
+# Prepare deployed applications via (app_deploy_prepare_*.yml plays):
+app_deploy_prepare_via: none
+
+# Check deployed applications via (app_deploy_check_*.yml plays):
+app_deploy_check_via: none
+
+# Run migrations for databases via (app_deploy_migrate_*.yml plays):
+app_deploy_migrate_via: none
+
+# Keep selected count of releases, another will be deleted
+app_deploy_keep_releases_count: 0
+
+# Parameters for submodules
+# -------------------------
+
+# HTTP-username and HTTP-password, and optional checksum to fetch out
+app_deploy_from_archive_http_username: ""
+app_deploy_from_archive_http_password: ""
+app_deploy_from_archive_checksum: ""
+
+# Strip NUMBER leading components from file names on extraction
+app_deploy_from_archive_strip_components: 1
+
+# Specify a HTTP GET params needed to be set
+app_deploy_from_archive_http_get_params: {}
+
+# Proxy addresses for HTTP and HTTPS traffic
+app_deploy_prepare_http_proxy: ""
+app_deploy_prepare_https_proxy: ""
+
+# Run npm commands via nvm manager
+app_deploy_prepare_npm_use_nvm: True
+
+# Override a version of NodeJS specified at .nvmrc file
+app_deploy_prepare_npm_use_nvm_nodejs_version: ""

@@ -1,0 +1,4 @@
+---
+- import_tasks: app_deploy.yml
+  tags:
+    - app_deploy

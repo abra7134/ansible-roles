@@ -1,0 +1,7 @@
+---
+- name: "check_npm : Run 'check-env' via npm"
+  command:
+    cmd: >-
+      {{ "/opt/nvm/nvm-exec" if app_deploy_prepare_npm_use_nvm else "" }}
+      npm run check-env
+    chdir: "{{ _app_deploy_version_dir }}"

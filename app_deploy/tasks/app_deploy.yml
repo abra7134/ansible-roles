@@ -1,0 +1,185 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    app_deploy_from is not string                                  or
+    app_deploy_via is not string                                   or
+    app_deploy_version is not string                               or
+    app_deploy_to_dir is not string                                or
+    app_deploy_releases_dirname is not string                      or
+    app_deploy_shared_dirname is not string                        or
+    app_deploy_current_dirname is not string                       or
+    app_deploy_current_via is not string                           or
+    app_deploy_shared_paths is string                              or
+    app_deploy_shared_paths is not sequence                        or
+    app_deploy_shared_via is not string                            or
+    app_deploy_prepare_configs_paths is string                     or
+    app_deploy_prepare_configs_paths is not sequence               or
+    app_deploy_prepare_states is not mapping                       or
+    app_deploy_prepare_via is not string                           or
+    app_deploy_check_via is not string                             or
+    app_deploy_migrate_via is not string                           or
+    app_deploy_keep_releases_count is not number                   or
+    app_deploy_from_archive_http_username is not string            or
+    app_deploy_from_archive_http_password is not string            or
+    app_deploy_from_archive_checksum is not string                 or
+    app_deploy_from_archive_strip_components is not number         or
+    app_deploy_from_archive_http_get_params is not mapping         or
+    app_deploy_prepare_http_proxy is not string                    or
+    app_deploy_prepare_https_proxy is not string                   or
+    app_deploy_prepare_npm_use_nvm is not boolean                  or
+    app_deploy_prepare_npm_use_nvm_nodejs_version is not string
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Ensure 'deployment' and 'releases' folders exists
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ app_deploy_to_dir }}"
+    - "{{ _app_deploy_releases_dir }}"
+  tags:
+    - app_deploy_configs
+    - app_deploy_migrate
+
+- name: Check application is completly downloaded
+  stat:
+    path: "{{ _app_deploy_complete_download_file }}"
+  register: __deploy_complete_download_file
+
+- name: Check current directory is linked to version (to skiping removing last)
+  stat:
+    path: "{{ _app_deploy_current_dir }}"
+  register: __deploy_current_dir
+  tags:
+    - app_deploy_migrate
+
+- block:
+  - name: Remove 'version' directory if application is not completly downloaded
+    file:
+      path: "{{ _app_deploy_version_dir }}"
+      state: absent
+
+  - name: Deploy via selected method
+    include_tasks: "app_deploy_from_{{ app_deploy_via | default('archive') }}.yml"
+
+  # Prepare before link shared paths by remove existing elements
+  - name: Remove existing shared elements from 'release' folder
+    file:
+      path: "{{ _app_deploy_version_dir }}/{{ item }}"
+      state: absent
+    loop: "{{ app_deploy_shared_paths }}"
+
+  - name: Mark that an application is downloaded
+    copy:
+      content: ""
+      dest: "{{ _app_deploy_complete_download_file }}"
+  when:
+    - not __deploy_complete_download_file.stat.exists
+    - not __deploy_current_dir.stat.exists
+      or (    __deploy_current_dir.stat.lnk_source is defined
+          and __deploy_current_dir.stat.lnk_source != _app_deploy_version_dir)
+
+- name: Check application is completly links shared
+  stat:
+    path: "{{ _app_deploy_complete_shared_file }}"
+  register: __deploy_complete_shared_file
+
+- name: Link shared paths via selected method
+  include_tasks: "app_deploy_shared_{{ app_deploy_shared_via }}.yml"
+  when:
+    - app_deploy_shared_via != 'none'
+    - not __deploy_complete_shared_file.stat.exists
+    - app_deploy_shared_paths | length > 0
+
+- name: Change files states
+  file: "{{ item.value | combine({dest: '%s/%s' % (_app_deploy_version_dir, item.key)}) }}"
+  loop: "{{ app_deploy_prepare_states | dict2items }}"
+  when:
+    - not __deploy_complete_shared_file.stat.exists
+
+- name: Mark that an application is links shared
+  copy:
+    content: ""
+    dest: "{{ _app_deploy_complete_shared_file }}"
+  when:
+    - not __deploy_complete_shared_file.stat.exists
+
+- name: Write configuration files
+  template:
+    src: "{{ item }}"
+    dest: "{{ _app_deploy_version_dir }}/{{ item.rstrip('.j2') | basename | replace('__', '/') }}"
+  loop: "{{ app_deploy_prepare_configs_paths }}"
+  tags:
+    - app_deploy_configs
+
+- name: Check application is completly prepared
+  stat:
+    path: "{{ _app_deploy_complete_prepare_file }}"
+  register: __deploy_complete_prepare_file
+
+- name: Prepare application via selected method
+  include_tasks: "app_deploy_prepare_{{ app_deploy_prepare_via }}.yml"
+  when:
+    - app_deploy_prepare_via != 'none'
+    - not __deploy_complete_prepare_file.stat.exists
+
+- name: Mark that a deploy is prepared
+  copy:
+    content: ""
+    dest: "{{ _app_deploy_complete_prepare_file }}"
+  when:
+    - not __deploy_complete_prepare_file.stat.exists
+
+- name: Check application via selected method
+  include_tasks: "app_deploy_check_{{ app_deploy_check_via }}.yml"
+  when:
+    - app_deploy_check_via != 'none'
+
+- name: Check application is completly migrated
+  stat:
+    path: "{{ _app_deploy_complete_migrate_file }}"
+  register: __deploy_complete_migrate_file
+  tags:
+    - app_deploy_migrate
+
+- name: Migrate application's databases via selected method
+  include_tasks: "app_deploy_migrate_{{ app_deploy_migrate_via }}.yml"
+  when:
+    - app_deploy_migrate_via != 'none'
+  tags:
+    - app_deploy_migrate
+
+- name: Mark that a deploy is migrated
+  copy:
+    content: ""
+    dest: "{{ _app_deploy_complete_migrate_file }}"
+  when:
+    - not __deploy_complete_migrate_file.stat.exists
+  tags:
+    - app_deploy_migrate
+
+- name: Link current via selected method
+  include_tasks: "app_deploy_current_{{ app_deploy_current_via }}.yml"
+  tags:
+    - app_deploy_link
+
+- name: Clean up releases
+  shell:
+    cmd: >-
+      ls -1 -t --directory {{ _app_deploy_releases_dir }}/*
+      | tail --lines=+{{ app_deploy_keep_releases_count | int + 1 }}
+      | xargs rm --recursive --force --verbose
+  register: __result_cleanup_releases
+  changed_when: __result_cleanup_releases.stdout | length > 0
+  when:
+    - not __deploy_complete_download_file.stat.exists
+    - app_deploy_keep_releases_count > 0
+  tags:
+    - app_deploy_cleanup

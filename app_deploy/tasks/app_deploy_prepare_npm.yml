@@ -1,0 +1,31 @@
+---
+- name: "prepare_npm : Set a required version of 'nodejs' at '.nvmrc' file"
+  copy:
+    content: "{{ app_deploy_prepare_npm_use_nvm_nodejs_version }}"
+    dest: "{{ _app_deploy_version_dir }}/.nvmrc"
+  when:
+    - app_deploy_prepare_npm_use_nvm
+    - app_deploy_prepare_npm_use_nvm_nodejs_version != ""
+
+- name: "prepare_npm : Install required version of 'nodejs' via 'nvm'"
+  shell:
+    cmd: >-
+      source /opt/nvm/nvm.sh --no-use && nvm install
+    chdir: "{{ _app_deploy_version_dir }}"
+    executable: /bin/bash
+  when:
+    - app_deploy_prepare_npm_use_nvm
+  register: __result_nvm_install
+  changed_when: "'Downloading and installing' in __result_nvm_install.stdout"
+
+- name: "prepare_npm : Install app dependencies via 'npm'"
+  shell:
+    cmd: >-
+      NO_UPDATE_NOTIFIER=1
+      http_proxy="{{ app_deploy_prepare_http_proxy }}"
+      https_proxy="{{ app_deploy_prepare_https_proxy }}"
+      {{ "/opt/nvm/nvm-exec" if app_deploy_prepare_npm_use_nvm else "" }}
+      npm install --only=production
+    chdir: "{{ _app_deploy_version_dir }}"
+  register: __result_npm_install
+  changed_when: _app_deploy_version_dir in __result_npm_install.stdout

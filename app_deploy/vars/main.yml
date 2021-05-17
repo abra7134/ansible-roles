@@ -1,0 +1,21 @@
+---
+# Mostly used directories
+_app_deploy_releases_dir: "{{ app_deploy_to_dir }}/{{ app_deploy_releases_dirname }}"
+_app_deploy_version_dir: "{{ _app_deploy_releases_dir }}/{{ app_deploy_version }}"
+_app_deploy_shared_dir: "{{ app_deploy_to_dir }}/{{ app_deploy_shared_dirname }}"
+_app_deploy_current_dir: "{{ app_deploy_to_dir }}/{{ app_deploy_current_dirname }}"
+
+# Complete filename
+_app_deploy_complete_download_file: "{{ _app_deploy_version_dir }}/.complete_download"
+_app_deploy_complete_shared_file: "{{ _app_deploy_version_dir }}/.complete_shared"
+_app_deploy_complete_prepare_file: "{{ _app_deploy_version_dir }}/.complete_prepare"
+_app_deploy_complete_migrate_file: "{{ _app_deploy_version_dir }}/.complete_migrate"
+
+# Application version with last migration filename
+_app_deploy_last_migration_version_file: "{{ _app_deploy_releases_dir }}/.last_migration_version"
+
+# Matrix of archiver supported
+_app_deploy_from_archive_utils:
+  bz2: bzip2
+  gz: gzip
+  xz: xz-utils

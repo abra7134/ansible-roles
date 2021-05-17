@@ -1,0 +1,19 @@
+---
+- name: "shared_symlink_directories : Ensure 'shared' folder exists"
+  file:
+    path: "{{ _app_deploy_shared_dir }}"
+    state: directory
+
+- name: "shared_symlink_directories : Ensure shared elements exists in 'shared' folder"
+  file:
+    path: "{{ _app_deploy_shared_dir }}/{{ item }}"
+    state: directory
+  loop: "{{ app_deploy_shared_paths }}"
+
+- name: "shared_symlink_directories : Link shared elements to 'release' folder via symlinks"
+  file:
+    src: "{{ _app_deploy_shared_dir }}/{{ item }}"
+    dest: "{{ _app_deploy_version_dir }}/{{ item }}"
+    state: link
+    force: yes
+  loop: "{{ app_deploy_shared_paths }}"

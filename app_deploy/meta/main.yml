@@ -1,0 +1,18 @@
+---
+dependencies:
+  - role: nvm
+    when:
+      - app_deploy_prepare_via == 'npm'
+      - app_deploy_prepare_npm_use_nvm
+
+galaxy_info:
+  author: Maksim Lekomtsev <lekomtsev@unix-mastery.ru>
+  description: Role to deploy (with scheme like 'capistrano') some application
+  license: MIT
+  min_ansible_version: 2.9  ## TODO <- Need to minimize
+  platforms:
+    - name: Debian
+      versions:
+        - jessie
+        - stretch
+        - buster
