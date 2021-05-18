@@ -13,6 +13,7 @@ debian_network_hosts: {}
 #  192.168.1.1:
 #    - hostname1
 #    - hostname2
+#  192.168.2.1: hostname3
 
 # The network interfaces configuration
 debian_network_interfaces: {}

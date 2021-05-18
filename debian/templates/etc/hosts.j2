@@ -3,7 +3,7 @@
 127.0.0.1 localhost.localdomain localhost
 {{ ansible_facts.default_ipv4.address | mandatory }} {{ inventory_hostname }} {{ inventory_hostname.split('.')[0] }}
 {% for ip, hostnames in debian_network_hosts.items() %}
-{{ ip }}  {{ ' '.join(hostnames) }}
+{{ ip }}  {{ (hostnames is string) | ternary(hostnames, ' '.join(hostnames)) }}
 {% endfor %}
 
 # The following lines are desirable for IPv6 capable hosts
