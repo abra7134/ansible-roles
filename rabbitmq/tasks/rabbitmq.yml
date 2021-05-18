@@ -1,0 +1,62 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    rabbitmq_cookie is not string          or
+    rabbitmq_env is not mapping            or
+    rabbitmq_limit_nofile is not number    or
+    rabbitmq_config is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Fetch a package
+  get_url:
+    checksum: "{{ _rabbitmq_deb_checksum }}"
+    url: "{{ _rabbitmq_deb_url }}"
+    dest: "{{ _rabbitmq_deb_path }}"
+
+- name: Install packages
+  apt:
+    deb: "{{ item.startswith('/') | ternary(item, omit) }}"
+    dpkg_options: force-confdef,force-confold,skip-same-version
+    name: "{{ item.startswith('/') | ternary(omit, item) }}"
+    state: "{{ item.startswith('/') | ternary('present', 'latest') }}"
+  loop:
+    - erlang-nox
+    - socat
+    - "{{ _rabbitmq_deb_path }}"
+  loop_control:
+    label: "{{ item | basename }}"
+
+- import_tasks: rabbitmq_systemd.yml
+
+- name: Write configuration files
+  template:
+    owner: "{{ item.endswith('.erlang.cookie') | ternary('rabbitmq', 'root') }}"
+    group: rabbitmq
+    mode: "{{ item.endswith('.erlang.cookie') | ternary(0400, 0640) }}"
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+  loop:
+    - /etc/rabbitmq/rabbitmq-env.conf
+    - /etc/rabbitmq/rabbitmq.config
+    - /var/lib/rabbitmq/.erlang.cookie
+  tags:
+    - rabbitmq_config
+  notify:
+    - Restart 'rabbitmq-server' service
+
+- name: Install plugins
+  rabbitmq_plugin:
+    name: &plugin_name "{{ item.key }}"
+    state: enabled
+  loop: "{{ rabbitmq_config | dict2items }}"
+  loop_control:
+    label: *plugin_name
+  when:
+    - item.key not in ['rabbit', 'kernel']

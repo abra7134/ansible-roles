@@ -4,14 +4,13 @@
     path: "{{ item }}"
     state: directory
   loop:
-    - /etc/systemd/system/elasticsearch.service.d
+    - /etc/systemd/system/rabbitmq-server.service.d
 
 - name: "systemd : Write the configuration"
   template:
     src: "{{ item.strip('/') }}.j2"
     dest: "{{ item }}"
   loop:
-    - /etc/systemd/system/elasticsearch.service.d/limitmemlock.conf
+    - /etc/systemd/system/rabbitmq-server.service.d/limitnofile.conf
   notify:
-    - Reload 'systemd'
-    - Restart 'elasticsearch' service
+    - Restart 'rabbitmq-server' service

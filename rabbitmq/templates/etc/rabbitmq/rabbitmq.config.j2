@@ -1,0 +1,35 @@
+%% -*- mode: erlang -*-
+%%
+{{ ansible_managed | comment('erlang') }}
+
+{% macro rabbitmq_write_params(params, indent=0) %}
+{% if params is mapping %}
+{% for param, value in params.items() %}
+{{ "{" | indent(width=indent, indentfirst=true) -}}
+{{ param }}, {{ rabbitmq_write_params(value, indent) -}}
+{{ "}" if loop.last else "},\n" -}}
+{% endfor %}
+{% elif params is sequence and params is not string %}
+{{ "[" -}}
+{% for param in params %}
+{% if loop.first %}
+
+{% endif %}
+{{ rabbitmq_write_params(param, indent+1) }}{{ "" if loop.last else ", " -}}
+{% endfor %}
+{{ "]" -}}
+{% elif params is boolean %}
+{{ params | lower -}}
+{% elif params is string or params is number %}
+{{ params -}}
+{% endif %}
+{% endmacro %}
+
+[
+{% for module, module_params in rabbitmq_config.items() if module_params != None %}
+ { {{- module }},
+  [
+{{ rabbitmq_write_params(module_params, 3) }}
+  ]}{{ "" if loop.last else ",\n" }}
+{% endfor %}
+].

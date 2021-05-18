@@ -1,0 +1,9 @@
+---
+# The 'rabbitmq' version to be installed
+_rabbitmq_version: 3.6.16
+
+# The 'rabbitmq' deb-package URL download from and his checksum
+_rabbitmq_deb_url: "https://github.com/rabbitmq/rabbitmq-server/releases/download/rabbitmq_v{{ _rabbitmq_version | replace('.', '_') }}/rabbitmq-server_{{ _rabbitmq_version }}-1_all.deb"
+_rabbitmq_deb_checksum: "sha1:e89a8ae304e36057dc4116f32dad6ad0157a1780"
+# The 'rabbitmq' deb-package download to
+_rabbitmq_deb_path: "/opt/{{ _rabbitmq_deb_url | basename }}"

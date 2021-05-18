@@ -1,0 +1,5 @@
+{{ ansible_managed | comment }}
+
+{% for param, value in rabbitmq_env.items() %}
+{{ param }}="{{ value }}"
+{% endfor %}
