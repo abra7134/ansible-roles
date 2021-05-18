@@ -1,0 +1,6 @@
+---
+# The 'erlang' version to be installed
+erlang_version: 20.3-1
+
+# Install a HiPE (High Performance Erlang Project) or not
+erlang_hipe: no

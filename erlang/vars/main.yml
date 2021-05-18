@@ -1,0 +1,6 @@
+---
+# The 'erlang-solutions' package version, URL, his checksum and path to be installed
+_erlang_solutions_deb_version: 1.0
+_erlang_solutions_deb_url: "https://packages.erlang-solutions.com/erlang-solutions_{{ _erlang_solutions_deb_version }}_all.deb"
+_erlang_solutions_deb_checksum: "sha1:ffc5bdae549d14f02b30c4f25cd16501c03c0f81"
+_erlang_solutions_deb_path: "/opt/{{ _erlang_solutions_deb_url | basename }}"

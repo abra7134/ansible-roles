@@ -1,0 +1,48 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    erlang_hipe is not boolean
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Fetch a 'erlang-solutions' package with repository settings
+  get_url:
+    checksum: "{{ _erlang_solutions_deb_checksum }}"
+    url: "{{ _erlang_solutions_deb_url }}"
+    dest: "{{ _erlang_solutions_deb_path }}"
+
+- name: Install a 'erlang-solutions' package with repository settings
+  apt:
+    deb: "{{ _erlang_solutions_deb_path }}"
+    dpkg_options: force-confdef,force-confold,skip-same-version
+    state: present
+  register: __erlang_solutions_install
+
+- name: Update the APT's cache
+  apt:
+    update_cache: yes
+  when:
+    - __erlang_solutions_install is changed
+
+- name: Pin the actual version
+  copy:
+    content: |
+      {% for package in ['erlang', 'erlang-*', 'esl-erlang'] %}
+      Package: {{ package }}
+      Pin: version 1:{{ erlang_version }}
+      Pin-Priority: 1001
+
+      {% endfor %}
+    dest: /etc/apt/preferences.d/00erlang
+
+- name: Install a package
+  apt:
+    name: "{{ item }}"
+  loop:
+    - "{{ erlang_hipe | ternary('erlang-base-hipe', 'erlang-base') }}"
