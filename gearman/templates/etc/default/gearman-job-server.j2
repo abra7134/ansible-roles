@@ -1,0 +1,7 @@
+{{ ansible_managed | comment }}
+
+PARAMS="\
+{% for param, value in gearman_config.items() %}
+--{{ param }}{{ "=%s" % value if value != None else "" }} \
+{% endfor %}
+"

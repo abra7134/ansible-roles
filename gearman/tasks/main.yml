@@ -1,0 +1,4 @@
+---
+- import_tasks: gearman.yml
+  tags:
+    - gearman

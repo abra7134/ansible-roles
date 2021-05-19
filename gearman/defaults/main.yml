@@ -1,0 +1,68 @@
+ ---
+# The 'gearman' main configuration
+gearman_config:
+  # Number of backlog connections for listen.
+  #backlog: 32
+
+  # Number of file descriptors to allow for the process (total connections will be slightly less).
+  # Default is max allowed for user.
+  #file-descriptors:
+
+  # Number of attempts to run the job before the job server removes it.
+  # This is helpful to ensure a bad job does not crash all available workers.
+  # Default is no limit.
+  #job-retries: 0
+
+  # Log file to write errors and information to.
+  # Turning this option on also forces the first verbose level to be enabled.
+  log-file: /var/log/gearman-job-server/gearman.log
+
+  # Address the server should listen on. Default is INADDR_ANY.
+  listen: localhost
+
+  # Port the server should listen on.
+  #port: 4730
+
+  # Load protocol module.
+  #protocol:
+
+  # Assign work in round-robin order per worker connection.
+  # The default is to assign work in the order of functions added by the worker.
+  #round-robin:
+
+  # Persistent queue type to use.
+  #queue-type:
+
+  # Number of I/O threads to use. Default=4.
+  #threads: 4
+
+  # Number of workers to wakeup for each job received. The default is to wakeup all available workers.
+  #worker-wakeup: 0
+
+  # HTTP
+  #http-port: 8080                     # Port to listen on.
+
+  # SQLite
+  #libsqlite3-db:                      # Database file to use.
+  #libsqlite3-table: gearman_queue     # Table to use.
+
+  # Memcached(libmemcached)
+  #libmemcached-servers:               # List of Memcached servers to use.
+
+  # Drizzle/MySQL(libdrizzle)
+  #lib-drizzle-host:                   # Host of server.
+  #lib-drizzle-port:                   # Port of server. (by default Drizzle)
+  #lib-drizzle-uds:                    # Unix domain socket for server.
+  #lib-drizzle-user:                   # User name for authentication.
+  #lib-drizzle-password:               # Password for authentication.
+  #lib-drizzle-db:                     # Schema/Database to use.
+  #lib-drizzle-table:                  # Table to use.
+  #lib-drizzle-mysql:                  # Use MySQL protocol.
+
+  # Postgres
+  #libpq-conninfo:                     # PostgreSQL connection information string.
+  #libpq-table: queue                  # Table to use.
+
+  # Tokyocabinet
+  #libtokyocabinet-file:               # File name of the database. [see: man tcadb, tcadbopen() for name guidelines]
+  #libtokyocabinet-optimize: true      # Optimize database on open. [default=true]

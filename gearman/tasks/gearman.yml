@@ -1,0 +1,39 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    gearman_config is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Pin the actual version
+  copy:
+    content: |
+      Package: gearman-*
+      Pin: version {{ _gearman_version }}-*
+      Pin-Priority: 1001
+    dest: /etc/apt/preferences.d/00gearman
+    mode: 0644
+
+- name: Install packages
+  apt:
+    name:
+      - gearman-job-server
+      - gearman-tools
+    state: latest
+
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+  loop:
+    - /etc/default/gearman-job-server
+  notify:
+    - Restart 'gearman-job-server' service
+
+- meta: flush_handlers
