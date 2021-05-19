@@ -60,3 +60,5 @@
     label: *plugin_name
   when:
     - item.key not in ['rabbit', 'kernel']
+
+- meta: flush_handlers
