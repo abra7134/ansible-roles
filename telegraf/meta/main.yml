@@ -3,7 +3,7 @@ dependencies: []
 
 galaxy_info:
   author: Maksim Lekomtsev <lekomtsev@unix-mastery.ru>
-  description: Role to configure Telegraf agent
+  description: Role to configure 'telegraf' package
   license: MIT
   min_ansible_version: 2.9  ## TODO <- Need to minimize
   platforms:
