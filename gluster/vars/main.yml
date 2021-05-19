@@ -1,0 +1,8 @@
+---
+# The 'gluster' version to be installed
+_gluster_version: 3.12.15
+_gluster_major_version: "{{ _gluster_version.split('.')[:2] | join('.') }}"
+
+# The 'gluster' repository and key URLs
+_gluster_repository_url: "https://download.gluster.org/pub/gluster/glusterfs/01.old-releases/{{ _gluster_major_version }}/LATEST/Debian/{{ ansible_facts.distribution_release }}/amd64/apt"
+_gluster_repository_key_url: "https://download.gluster.org/pub/gluster/glusterfs/01.old-releases/{{ _gluster_major_version }}/rsa.pub"

@@ -1,0 +1,35 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    gluster_client_only is not boolean
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Add a repository key
+  apt_key:
+    url: "{{ _gluster_repository_key_url }}"
+
+- name: Add a repository
+  apt_repository:
+    repo: "deb {{ _gluster_repository_url }} {{ ansible_facts.distribution_release }} main"
+    update_cache: yes
+
+- name: Pin the actual version
+  copy:
+    content: |
+      Package: glusterfs-*
+      Pin: version {{ _gluster_version }}-1
+      Pin-Priority: 1001
+    dest: /etc/apt/preferences.d/00glusterfs
+
+- name: Install packages
+  apt:
+    name:
+      - glusterfs-client
+      - "{{ 'glusterfs-server' if not gluster_client_only else omit }}"
