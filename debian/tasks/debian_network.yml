@@ -5,6 +5,16 @@
   tags:
     - debian_network_hostname
 
+- name: "network : Write 'hosts' file"
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0644
+  loop:
+    - /etc/hosts
+  tags:
+    - debian_network_hosts
+
 - name: "network : Write network configuration files"
   template:
     src: "{{ item.strip('/') }}.j2"
@@ -12,7 +22,6 @@
     mode: 0644
   loop:
     - /etc/network/interfaces
-    - /etc/hosts
   notify:
     - Restart 'loopback' network interface
     - Restart 'networking' service
