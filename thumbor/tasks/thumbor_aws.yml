@@ -1,0 +1,26 @@
+---
+- name: "aws : Install a 'tc_aws' python package"
+  pip:
+    name: tc_aws
+
+- name: "aws : Create directory for credentials"
+  file:
+    group: "{{ _thumbor_group }}"
+    mode: 0750
+    path: "{{ _thumbor_data_dir }}/.aws"
+    owner: "{{ _thumbor_user }}"
+    state: directory
+
+- name: "aws : Write credentials"
+  copy:
+    content: |
+      {% for group, params in thumbor_aws_credentials.items() %}
+      [{{ group }}]
+      aws_access_key_id = {{ params.access_key }}
+      aws_secret_access_key = {{ params.secret_key }}
+
+      {% endfor %}
+    dest: "{{ _thumbor_data_dir }}/.aws/credentials"
+    group: "{{ _thumbor_group }}"
+    mode: 0640
+    owner: "{{ _thumbor_user }}"

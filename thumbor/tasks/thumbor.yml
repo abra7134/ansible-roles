@@ -1,0 +1,81 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    thumbor_aws_credentials is not mapping         or
+    thumbor_config is not mapping                  or
+    thumbor_loglevel is not string                 or
+    thumbor_ip is not string                       or
+    thumbor_port is not number
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Install dependencies
+  apt:
+    name:
+      - build-essential
+      - libcurl4-openssl-dev
+      - libssl-dev
+      - python-dev
+      - python-pip
+      - python-setuptools
+      - python-wheel
+    state: latest
+
+- name: Install a python package
+  pip:
+    name: thumbor
+    version: "{{ _thumbor_version }}"
+
+- name: Create a system group
+  group:
+    name: "{{ _thumbor_group }}"
+
+- name: Create a system user
+  user:
+    createhome: no
+    group: "{{ _thumbor_group }}"
+    home: "{{ _thumbor_data_dir }}"
+    name: "{{ _thumbor_user }}"
+    shell: /usr/sbin/nologin
+
+- name: Create a data directory
+  file:
+   group: "{{ _thumbor_group }}"
+   mode: 0750
+   path: "{{ _thumbor_data_dir }}"
+   owner: "{{ _thumbor_user }}"
+   state: directory
+
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+  loop:
+    - /etc/systemd/system/thumbor.service
+    - /etc/thumbor.conf
+  notify:
+    - Restart 'thumbor' service
+  tags:
+    - thumbor_config
+
+- name: Configure AWS credentials if 'tc_aws' loader is used
+  include_tasks: thumbor_aws.yml
+  when: >-
+    ( thumbor_config.loader is defined
+      and thumbor_config.loader[0:7] == 'tc_aws.' )
+    or
+    ( thumbor_config.result_storage is defined
+      and thumbor_config.result_storage[0:7] == 'tc_aws.' )
+    or
+    ( thumbor_config.storage is defined
+      thumbor_config.storage[0:7] == 'tc_aws.' )
+  tags:
+    - thumbor_aws
+
+- meta: flush_handlers

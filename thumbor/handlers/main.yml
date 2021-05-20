@@ -1,0 +1,7 @@
+---
+- name: Restart 'thumbor' service
+  systemd:
+    daemon_reload: yes
+    enabled: yes
+    name: thumbor
+    state: restarted

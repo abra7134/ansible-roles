@@ -1,0 +1,4 @@
+---
+- import_tasks: thumbor.yml
+  tags:
+    - thumbor

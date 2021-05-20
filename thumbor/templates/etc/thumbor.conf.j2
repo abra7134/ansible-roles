@@ -1,0 +1,12 @@
+{{ ansible_managed | comment }}
+
+{% for param, value in thumbor_config.items() %}
+{{ param | upper }} =
+{%- if value is boolean %}
+ {{ value | ternary(True, False) }}
+{% elif value is sequence and value is string %}
+ '{{ value }}'
+{% else %}
+ {{ value }}
+{% endif %}
+{% endfor %}

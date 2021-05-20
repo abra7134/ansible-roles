@@ -1,0 +1,157 @@
+---
+# The host address and port to run this 'thumbor' instance at
+thumbor_ip: 0.0.0.0
+thumbor_port: 8888
+
+# The 'thumbor' log level to be used
+# Possible values are: debug, info, warning, error, critical or notset
+thumbor_loglevel: warning
+
+# The credentials to AWS if 'tc_aws' extension is used
+thumbor_aws_credentials: {}
+  # default:
+  #   access_key:
+  #   secret_key:
+
+# The 'thumbor' main configuration
+thumbor_config: {}
+  # thumbor_log_config: None
+  # thumbor_log_format: %(asctime)s %(name)s:%(levelname)s %(message)s
+  # thumbor_log_date_format: %y-%m-%d %h:%m:%s
+  # max_width: 0
+  # max_height: 0
+  # max_pixels: 75000000.0
+  # min_width: 1
+  # min_height: 1
+  # allowed_sources: []
+  # quality: 80
+  # progressive_jpeg: True
+  # pillow_jpeg_subsampling: None
+  # pillow_jpeg_qtables: None
+  # pillow_resampling_filter: LANCZOS
+  # webp_quality: None
+  # png_compression_level: 6
+  # pillow_preserve_indexed_mode: True
+  # auto_webp: False
+  # auto_png_to_jpg: False
+  # svg_dpi: 150
+  # max_age: 86400
+  # max_age_temp_image: 0
+  # respect_orientation: False
+  # ignore_smart_errors: False
+  # send_if_modified_last_modified_headers: False
+  # preserve_exif_info: False
+  # allow_animated_gifs: True
+  # use_gifsicle_engine: False
+  # use_blacklist: False
+  # engine_threadpool_size: 0
+  # metrics: thumbor.metrics.logger_metrics
+  # loader: thumbor.loaders.http_loader
+  # storage: thumbor.storages.file_storage
+  # result_storage: None
+  # engine: thumbor.engines.pil
+  # gif_engine: thumbor.engines.gif
+  # url_signer: libthumbor.url_signers.base64_hmac_sha1
+  # security_key: my_secure_key
+  # allow_unsafe_url: True
+  # allow_old_urls: True
+  # enable_etags: True
+  # max_id_length: 32
+  # gc_interval: None
+  # healthcheck_route: /healthcheck
+  # statsd_host: None
+  # statsd_port: 8125
+  # statsd_prefix: None
+  # file_loader_root_path: /root
+  # http_loader_connect_timeout: 5
+  # http_loader_request_timeout: 20
+  # http_loader_follow_redirects: True
+  # http_loader_max_redirects: 5
+  # http_loader_max_clients: 10
+  # http_loader_forward_user_agent: False
+  # http_loader_forward_all_headers: False
+  # http_loader_forward_headers_whitelist: []
+  # http_loader_default_user_agent: thumbor/6.7.5
+  # http_loader_proxy_host: None
+  # http_loader_proxy_port: None
+  # http_loader_proxy_username: None
+  # http_loader_proxy_password: None
+  # http_loader_ca_certs: None
+  # http_loader_validate_certs: None
+  # http_loader_client_key: None
+  # http_loader_client_cert: None
+  # http_loader_curl_async_http_client: False
+  # http_loader_curl_low_speed_time: 0
+  # http_loader_curl_low_speed_limit: 0
+  # app_class: thumbor.app.thumborserviceapp
+  # storage_expiration_seconds: 2592000
+  # stores_crypto_key_for_each_image: False
+  # file_storage_root_path: /tmp/thumbor/storage
+  # upload_max_size: 0
+  # upload_enabled: False
+  # upload_photo_storage: thumbor.storages.file_storage
+  # upload_delete_allowed: False
+  # upload_put_allowed: False
+  # upload_default_filename: image
+  # memcache_storage_servers: ['localhost:11211']
+  # mixed_storage_file_storage: thumbor.storages.no_storage
+  # mixed_storage_crypto_storage: thumbor.storages.no_storage
+  # mixed_storage_detector_storage: thumbor.storages.no_storage
+  # meta_callback_name: None
+  # detectors: []
+  # face_detector_cascade_file: haarcascade_frontalface_alt.xml
+  # glasses_detector_cascade_file: haarcascade_eye_tree_eyeglasses.xml
+  # profile_detector_cascade_file: haarcascade_profileface.xml
+  # optimizers: []
+  # jpegtran_path: /usr/bin/jpegtran
+  # jpegtran_scans_file: ''
+  # ffmpeg_path: /usr/local/bin/ffmpeg
+  # filters:
+  #   - thumbor.filters.brightness
+  #   - thumbor.filters.colorize
+  #   - thumbor.filters.contrast
+  #   - thumbor.filters.rgb
+  #   - thumbor.filters.round_corner
+  #   - thumbor.filters.quality
+  #   - thumbor.filters.noise
+  #   - thumbor.filters.watermark
+  #   - thumbor.filters.equalize
+  #   - thumbor.filters.fill
+  #   - thumbor.filters.sharpen
+  #   - thumbor.filters.strip_exif
+  #   - thumbor.filters.strip_icc
+  #   - thumbor.filters.frame
+  #   - thumbor.filters.grayscale
+  #   - thumbor.filters.rotate
+  #   - thumbor.filters.format
+  #   - thumbor.filters.max_bytes
+  #   - thumbor.filters.convolution
+  #   - thumbor.filters.blur
+  #   - thumbor.filters.extract_focal
+  #   - thumbor.filters.focal
+  #   - thumbor.filters.no_upscale
+  #   - thumbor.filters.saturation
+  #   - thumbor.filters.max_age
+  #   - thumbor.filters.curve
+  #   - thumbor.filters.background_color
+  #   - thumbor.filters.upscale
+  #   - thumbor.filters.proportion
+  #   - thumbor.filters.stretch
+  # result_storage_expiration_seconds: 0
+  # result_storage_file_storage_root_path: /tmp/thumbor/result_storage
+  # result_storage_stores_unsafe: False
+  # redis_queue_server_host: localhost
+  # redis_queue_server_port: 6379
+  # redis_queue_server_db: 0
+  # redis_queue_server_password: None
+  # sqs_queue_key_id: None
+  # sqs_queue_key_secret: None
+  # sqs_queue_region: us-east-1
+  # use_custom_error_handling: False
+  # error_handler_module: thumbor.error_handlers.sentry
+  # error_file_logger: None
+  # error_file_name_use_context: False
+  # sentry_dsn_url: ''
+  # sentry_environment: None
+  # max_wait_seconds_before_server_shutdown: 0
+  # max_wait_seconds_before_io_shutdown: 0

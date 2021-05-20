@@ -1,0 +1,18 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=thumbor
+Documentation=https://thumbor.readthedocs.io/en/latest/
+Wants=network-online.target
+After=network-online.target
+AssertFileIsExecutable=/usr/local/bin/thumbor
+
+[Service]
+ExecStart=/usr/local/bin/thumbor --ip {{ thumbor_ip }} --port {{ thumbor_port }} --conf /etc/thumbor.conf --log-level {{ thumbor_loglevel }}
+Group={{ _thumbor_group }}
+Restart=always
+WorkingDirectory={{ _thumbor_data_dir }}
+User={{ _thumbor_user }}
+
+[Install]
+WantedBy=multi-user.target

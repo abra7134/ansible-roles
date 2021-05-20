@@ -1,0 +1,10 @@
+---
+# The 'thumbor' version will be installed
+_thumbor_version: 6.7.5
+
+# The system user and group created for 'thumbor' service
+_thumbor_user: thumbor
+_thumbor_group: thumbor
+
+# The parent directory for all 'thumbor' volumes
+_thumbor_data_dir: /var/lib/thumbor/storage
