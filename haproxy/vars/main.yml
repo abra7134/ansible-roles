@@ -1,0 +1,7 @@
+---
+# The 'haproxy' major version to be installed
+_haproxy_major_version: 2.1
+
+# The 'haproxy' repository and key URLs
+_haproxy_repository_key_url: https://haproxy.debian.net/bernat.debian.org.gpg
+_haproxy_repository_url: http://haproxy.debian.net

@@ -1,0 +1,59 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    haproxy_config is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Add a repository key
+  apt_key:
+    url: "{{ _haproxy_apt_key_url }}"
+
+- name: Add a repository
+  apt_repository:
+    repo: "deb {{ _haproxy_repository_url }} {{ ansible_facts.distribution_release }}-backports-{{ _haproxy_major_version }} main"
+    update_cache: yes
+
+- name: Pin the actual version
+  copy:
+    content: |
+      Package: haproxy
+      Pin: version {{ _haproxy_major_version }}.*
+      Pin-Priority: 1001
+    dest: /etc/apt/preferences.d/00haproxy
+
+- name: Install packages
+  apt:
+    name:
+      - haproxy
+      - socat
+    state: latest
+
+- name: Create directories
+  file:
+    dest: "{{ item }}"
+    state: directory
+  loop:
+    - /etc/systemd/system/haproxy.service.d
+  tags:
+    - haproxy_config
+
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+  loop:
+    - /etc/haproxy/haproxy.cfg
+    - /etc/systemd/system/haproxy.service.d/syslogidentifier.conf
+  notify:
+    - Reload 'haproxy' service
+  tags:
+    - haproxy_config
+
+- meta: flush_handlers

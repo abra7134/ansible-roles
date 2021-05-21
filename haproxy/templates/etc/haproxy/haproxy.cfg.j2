@@ -1,0 +1,32 @@
+{{ ansible_managed | comment }}
+
+{% macro haproxy_write_sections(section, params) %}
+{{ section }}
+{% if params is sequence and params is not string %}
+{% for param_value in params %}
+{% if param_value is string or param_value is number %}
+    {{ param_value }}
+{% elif param_value is mapping %}
+{% for param_name, subparams in param_value.items() %}
+{% if subparams is string or subparams is number %}
+    {{ param_name }} {{ subparams }}
+{% elif subparams is sequence %}
+{% for subparam in subparams %}
+    {{ param_name }} {{ subparam }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endmacro -%}
+
+{% set first_sections = ['global', 'defaults'] %}
+{% for section in first_sections %}
+{% if haproxy_config[section] is defined %}
+{{ haproxy_write_sections(section, haproxy_config[section]) }}
+{% endif %}
+{% endfor %}
+{% for section in haproxy_config.keys() | sort if section not in first_sections %}
+{{ haproxy_write_sections(section, haproxy_config[section]) }}
+{% endfor %}
