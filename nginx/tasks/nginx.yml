@@ -1,0 +1,85 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    nginx_configs is not mapping           or
+    nginx_sites_configs is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Add a repository key
+  apt_key:
+    url: "{{ _nginx_repository_key_url }}"
+
+- name: Add a repository
+  apt_repository:
+    repo: "deb {{ _nginx_repository_url }} {{ ansible_facts.distribution_release }} nginx"
+    update_cache: yes
+
+- name: Pin the actual version
+  copy:
+    content: |
+      {% for package in ('nginx', 'nginx-module-*') %}
+      Package: {{ package }}
+      Pin: version {{ _nginx_version }}-*
+      Pin-Priority: 1001
+
+      {% endfor %}
+    dest: /etc/apt/preferences.d/00nginx
+
+- name: Install a package
+  apt:
+    name:
+      - nginx
+    state: latest
+  notify:
+    - Delete 'default' site
+
+- import_tasks: nginx_systemd.yml
+  tags:
+    - nginx_systemd
+
+- name: Create directories
+  file:
+    dest: "{{ item }}"
+    state: directory
+  loop:
+    - /etc/nginx/conf.d/sites
+    - /etc/nginx/conf.d/snippets
+    - /var/www/html
+  tags:
+    - nginx_config
+    - nginx_config_sites
+
+- name: Write configuration files
+  template:
+    src: "{{ (item.value.type | default('other') == 'htpasswd') | ternary('etc/nginx/htpasswd.j2', 'etc/nginx/nginx.conf.j2') }}"
+    dest: &config_path "/etc/nginx/{{ item.value.path }}"
+    mode: "{{ (item.value.type | default('other') == 'htpasswd') | ternary(0600, 0644) }}"
+    owner: "{{ (item.value.type | default('other') == 'htpasswd') | ternary('nginx', omit) }}"
+    group: "{{ (item.value.type | default('other') == 'htpasswd') | ternary('nginx', omit) }}"
+  loop: "{{ nginx_configs | dict2items }}"
+  loop_control:
+    label: *config_path
+  notify:
+    - Reload 'nginx' service
+  tags:
+    - nginx_config
+
+- name: Write sites configuration files
+  template:
+    src: etc/nginx/conf.d/sites/site.conf.j2
+    dest: &site_config_path "/etc/nginx/conf.d/sites/{{ item.key }}.conf"
+    mode: "{{ item.value.mode | default(0644) }}"
+  loop: "{{ nginx_sites | dict2items }}"
+  loop_control:
+    label: *site_config_path
+  notify:
+    - Reload 'nginx' service
+  tags:
+    - nginx_config_sites

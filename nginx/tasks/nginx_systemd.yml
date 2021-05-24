@@ -1,0 +1,15 @@
+---
+- name: "systemd : Create a directory"
+  file:
+    dest: /etc/systemd/system/nginx.service.d
+    state: directory
+
+- name: "systemd : Set a 'restart=always' for 'nginx' service"
+  copy:
+    content: |
+      [Service]
+      Restart=always
+    dest: /etc/systemd/system/nginx.service.d/restart.conf
+  notify:
+    - Reload 'systemd' daemon
+

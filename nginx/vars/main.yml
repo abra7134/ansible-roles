@@ -1,0 +1,7 @@
+---
+# The 'nginx' version to be installed
+_nginx_version: 1.14.2
+
+# The 'nginx' repository and key URLs
+_nginx_repository_key_url: https://nginx.org/keys/nginx_signing.key
+_nginx_repository_url: http://nginx.org/packages/debian
