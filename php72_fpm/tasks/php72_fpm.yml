@@ -1,0 +1,74 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    php72_fpm_components is string                  or
+    php72_fpm_components is not sequence            or
+    php72_fpm_config is not mapping                 or
+    php72_fpm_pools is not mapping                  or
+    php72_fpm_ini is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Add a repository key
+  apt_key:
+    url: "{{ _php72_fpm_repository_key_url }}"
+
+- name: Add a repository
+  apt_repository:
+    repo: "deb {{ _php72_fpm_repository_url }} {{ ansible_facts.distribution_release }} main"
+    update_cache: yes
+
+- name: Install packages
+  apt:
+    name: "{{ ['php7.2'] | product(php72_fpm_components + ['cli', 'fpm']) | map('join', '-') | list }}"
+    state: latest
+  notify:
+    - Remove 'www' pool
+
+- import_tasks: php72_fpm_systemd.yml
+  tags:
+    - php72_fpm_systemd
+
+- name: Create directories for logs
+  file:
+    path: "{{ item }}"
+    mode: 0700
+    state: directory
+  loop: "{{ php72_fpm_pools | json_query('*.[\"access.log\", slowlog]') | flatten | map('dirname') | list | unique }}"
+
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0644
+  loop:
+    - /etc/php/7.2/fpm/php.ini
+    - /etc/php/7.2/fpm/php-fpm.conf
+  notify:
+    - Restart 'php7.2-fpm' service
+  tags:
+    - php72_fpm_config
+
+- name: Write pools configuration files
+  template:
+    src: etc/php/7.2/fpm/pool.d/pool.conf.j2
+    dest: &pool_conf_path "/etc/php/7.2/fpm/pool.d/{{ item.key }}.conf"
+    mode: 0644
+  loop: "{{ php72_fpm_pools | dict2items }}"
+  loop_control:
+    label: *pool_conf_path
+  when:
+    - item.key != 'default'
+    - item.value != None
+  notify:
+    - Reload 'php7.2-fpm' service
+  tags:
+    - php72_fpm_pools
+
+- meta: flush_handlers

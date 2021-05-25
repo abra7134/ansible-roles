@@ -1,0 +1,4 @@
+---
+- import_tasks: php72_fpm.yml
+  tags:
+    - php72_fpm
