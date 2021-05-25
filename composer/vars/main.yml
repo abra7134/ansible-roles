@@ -1,0 +1,4 @@
+---
+# The 'composer' binary URL download from, and path download to
+_composer_binary_url: "https://getcomposer.org{{ (composer_version == 'latest') | ternary('', '/download/' + composer_version) }}/composer.phar"
+_composer_binary_path: "/opt/composer-{{ composer_version }}.phar"

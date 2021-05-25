@@ -1,0 +1,6 @@
+---
+# The 'composer' version to be installed
+composer_version: latest
+
+# Github Oauth key for dependencies download
+composer_github_key: ""

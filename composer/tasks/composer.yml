@@ -1,0 +1,38 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    composer_version is not string        or
+    composer_github_key is not string
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Download binary
+  get_url:
+    url: "{{ _composer_binary_url }}"
+    dest: "{{ _composer_binary_path }}"
+    mode: 0755
+
+- name: Create symlink to current version
+  file:
+    dest: /usr/local/bin/composer
+    src: "{{ _composer_binary_path }}"
+    state: link
+    force: yes
+
+- name: Set Github oAuth
+  command: >-
+    composer
+      config
+      --global
+      github-oauth.github.com
+      "{{ composer_github_key }}"
+  when:
+    - composer_github_key != ""
+  tags:
+    - composer_github_oauth
