@@ -1,0 +1,14 @@
+---
+- name: "systemd : Create a directory"
+  file:
+    dest: /etc/systemd/system/php5.6-fpm.service.d
+    state: directory
+
+- name: "systemd : Set a 'restart=always' for 'php5.6-fpm' service"
+  copy:
+    content: |
+      [Service]
+      Restart=always
+    dest: /etc/systemd/system/php5.6-fpm.service.d/restart.conf
+  notify:
+    - Reload 'systemd' daemon

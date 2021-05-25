@@ -1,0 +1,4 @@
+---
+- import_tasks: php56_fpm.yml
+  tags:
+    - php56_fpm

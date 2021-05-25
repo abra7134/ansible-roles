@@ -1,0 +1,21 @@
+{{ ansible_managed | comment(decoration='; ') }}
+
+; Start a new pool named '{{ item.key }}'.
+; the variable $pool can we used in any directive and will be replaced by the
+; pool name ('{{ item.key }}' here)
+
+[{{ item.key }}]
+{% if item.value is mapping %}
+{# If pool's default settings is defined #}
+{% if php56_fpm_pools['default'] is mapping %}
+{# then merge with defined values #}
+{% set settings = php56_fpm_pools['default'] %}
+{% set        x = settings.update(item.value) %}
+{% else %}
+{# Else just use defined values #}
+{% set settings = item.value %}
+{% endif %}
+{% for param in settings|sort if settings[param] != None %}
+{{ param }} = {{ settings[param] }}
+{% endfor %}
+{% endif %}

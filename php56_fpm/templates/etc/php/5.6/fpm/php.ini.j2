@@ -1,0 +1,5 @@
+{{ ansible_managed | comment(decoration="; ") }}
+
+{% for param, value in php56_fpm_ini.items() %}
+{{ param }} = {{ value if value != None else "" }}
+{% endfor %}
