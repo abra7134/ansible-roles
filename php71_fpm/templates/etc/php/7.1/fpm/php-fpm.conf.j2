@@ -1,0 +1,8 @@
+{{ ansible_managed | comment(decoration="; ") }}
+
+[global]
+{% for param, value in php71_fpm_config.items() %}
+{{ param }} = {{ value }}
+{% endfor %}
+
+include=/etc/php/7.1/fpm/pool.d/*.conf
