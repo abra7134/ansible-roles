@@ -89,3 +89,5 @@
     - Reload 'nginx' service
   tags:
     - nginx_config_sites
+
+- meta: flush_handlers
