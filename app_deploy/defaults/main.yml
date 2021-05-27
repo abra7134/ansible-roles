@@ -48,18 +48,19 @@ app_deploy_from_archive_http_username: ""
 app_deploy_from_archive_http_password: ""
 app_deploy_from_archive_checksum: ""
 
+# Specify a HTTP-headers needed to be set
+app_deploy_from_archive_http_headers: {}
+
 # Strip NUMBER leading components from file names on extraction
 app_deploy_from_archive_strip_components: 1
 
-# Specify a HTTP GET params needed to be set
-app_deploy_from_archive_http_get_params: {}
 
 # Proxy addresses for HTTP and HTTPS traffic
 app_deploy_prepare_http_proxy: ""
 app_deploy_prepare_https_proxy: ""
 
 # Run npm commands via nvm manager
-app_deploy_prepare_npm_use_nvm: True
+app_deploy_prepare_npm_use_nvm: yes
 
 # Override a version of NodeJS specified at .nvmrc file
 app_deploy_prepare_npm_use_nvm_nodejs_version: ""

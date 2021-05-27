@@ -99,8 +99,10 @@
     - app_deploy_shared_paths | length > 0
 
 - name: Change files states
-  file: "{{ item.value | combine({dest: '%s/%s' % (_app_deploy_version_dir, item.key)}) }}"
+  file: "{{ item.value | combine({'dest': '%s/%s' % (_app_deploy_version_dir, item.key)}) }}"
   loop: "{{ app_deploy_prepare_states | dict2items }}"
+  loop_control:
+    label: "{{ '%s/%s' % (_app_deploy_version_dir, item.key) }}"
   when:
     - not __deploy_complete_shared_file.stat.exists
 
@@ -114,8 +116,10 @@
 - name: Write configuration files
   template:
     src: "{{ item }}"
-    dest: "{{ _app_deploy_version_dir }}/{{ item.rstrip('.j2') | basename | replace('__', '/') }}"
+    dest: &config_dest "{{ _app_deploy_version_dir }}/{{ item.rstrip('.j2') | basename | replace('__', '/') }}"
   loop: "{{ app_deploy_prepare_configs_paths }}"
+  loop_control:
+    label: *config_dest
   tags:
     - app_deploy_configs
 
