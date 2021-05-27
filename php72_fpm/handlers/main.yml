@@ -1,5 +1,5 @@
 ---
-- name: Remove 'www' pool
+- name: Remove 'www' php7.2-fpm pool
   file:
     path: /etc/php/7.2/fpm/pool.d/www.conf
     state: absent

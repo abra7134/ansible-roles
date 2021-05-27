@@ -29,7 +29,7 @@
     name: "{{ ['php7.2'] | product(php72_fpm_components + ['cli', 'fpm']) | map('join', '-') | list }}"
     state: latest
   notify:
-    - Remove 'www' pool
+    - Remove 'www' php7.2-fpm pool
 
 - import_tasks: php72_fpm_systemd.yml
   tags:
