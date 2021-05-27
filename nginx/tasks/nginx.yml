@@ -44,6 +44,12 @@
   tags:
     - nginx_systemd
 
+- name: Add 'nginx' system user to 'www-data' group
+  user:
+    name: nginx
+    groups:
+      - www-data
+
 - name: Create directories
   file:
     dest: "{{ item }}"
