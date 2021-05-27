@@ -54,6 +54,15 @@ app_deploy_from_archive_http_headers: {}
 # Strip NUMBER leading components from file names on extraction
 app_deploy_from_archive_strip_components: 1
 
+# Calculate a pause before a flushing of the schema cache
+# Or use a static value = 3 seconds
+app_deploy_migrate_yii_calculate_pause: no
+
+# What flush by the yii cache/flush-WHAT command
+app_deploy_migrate_yii_flush_what: schema
+
+# Run migrations by this user
+app_deploy_migrate_yii_become_user: www-data
 
 # Proxy addresses for HTTP and HTTPS traffic
 app_deploy_prepare_http_proxy: ""

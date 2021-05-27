@@ -1,0 +1,99 @@
+---
+- name: Check existance of a file with last migration version
+  stat:
+    path: "{{ _app_deploy_last_migration_version_file }}"
+  register: __deploy_last_migration_version_file
+
+- name: Getting a version with a last migration
+  command:
+    cmd: >-
+      head
+        --lines=1
+        {{ _app_deploy_last_migration_version_file }}
+  register: __result_getting_version
+  when:
+    - __deploy_current_dir.stat.exists
+    - __deploy_complete_migrate_file.stat.exists
+    - __deploy_last_migration_version_file.stat.exists
+
+- name: Getting a PHP version which used on a last migration
+  command:
+    cmd: >-
+      find
+        -mindepth 1
+        -maxdepth 1
+        -name '.profile_php*'
+    chdir: "{{ _app_deploy_releases_dir }}/{{ __result_getting_version.stdout }}"
+  register: __result_getting_php_version
+  when:
+    - __result_getting_version is changed
+    - __result_getting_version.stdout != ""
+
+- name: Run 'yii migrate/to' (migration downgrade to release deploy time)
+  # Don't use a 'become' because it's sometimes problem there is
+  command:
+    cmd: >-
+      su
+        --shell="/bin/sh"
+        --command="{{ __result_getting_php_version.stdout | regex_replace('./.profile_') | default('php5.6') }} yii migrate/to {{ __deploy_complete_migrate_file.stat.ctime | int }} --interactive=0"
+        "{{ app_deploy_migrate_yii_become_user }}"
+    chdir: "{{ _app_deploy_releases_dir }}/{{ __result_getting_version.stdout }}"
+  register: __result_migrate_to
+  changed_when: "'Nothing needs to be done.' not in __result_migrate_to.stdout"
+  when:
+    - __result_getting_php_version is changed
+
+- name: Print results of 'yii migrate/to'
+  debug:
+    var: __result_migrate_to.stdout_lines
+  when:
+    - __result_migrate_to is changed
+
+- name: Saving an application version with last migration
+  copy:
+    content: "{{ app_deploy_version }}"
+    dest: "{{ _app_deploy_last_migration_version_file }}"
+
+- name: Run 'yii migrate/up' (migration upgrade)
+  command:
+    cmd: >-
+      su
+        --shell="/bin/sh"
+        --command="php yii migrate/up --interactive=0"
+        "{{ app_deploy_migrate_yii_become_user }}"
+    chdir: "{{ _app_deploy_version_dir }}"
+  register: __result_migrate_up
+  changed_when:
+    - "'No new migrations found.' not in __result_migrate_up.stdout"
+
+- name: Print results of 'yii migrate/up'
+  debug:
+    var: __result_migrate_up.stdout_lines
+  when:
+    - __result_migrate_up is changed
+
+- block:
+  - name: Pause before a flushing of the schema cache
+    pause:
+      seconds: >-
+        {% if app_deploy_migrate_yii_calculate_pause %}
+        {% if __result_migrate_to is changed %}
+        {% set __migrate_to_s = (__result_migrate_to.end | datetime - __result_migrate_to.start | datetime).seconds %}
+        {% endif %}
+        {% set __migrate_up_s = (__result_migrate_up.end | datetime - __result_migrate_up.start | datetime).seconds %}
+        {{ __migrate_to_s | default(0) + __migrate_up_s }}
+        {% else %}
+        3
+        {% endif %}
+
+  - name: Run 'yii cache/flush' command
+    command:
+      cmd: >-
+        su
+          --shell="/bin/sh"
+          --command="php yii cache/flush-{{ app_deploy_migrate_yii_flush_what | default('schema') }} --interactive=0"
+          "{{ app_deploy_migrate_yii_become_user }}"
+      chdir: "{{ _app_deploy_version_dir }}"
+  when:
+    -    ( __result_migrate_up is changed )
+      or ( __result_migrate_to is changed )

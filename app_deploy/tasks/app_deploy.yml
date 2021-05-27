@@ -3,33 +3,38 @@
   fail:
     msg: Invalid a variables type or value, please check
   when: >-
-    app_deploy_from is not string                                  or
-    app_deploy_via is not string                                   or
-    app_deploy_version is not string                               or
-    app_deploy_to_dir is not string                                or
-    app_deploy_releases_dirname is not string                      or
-    app_deploy_shared_dirname is not string                        or
+    app_deploy_check_via is not string                             or
     app_deploy_current_dirname is not string                       or
     app_deploy_current_via is not string                           or
-    app_deploy_shared_paths is string                              or
-    app_deploy_shared_paths is not sequence                        or
-    app_deploy_shared_via is not string                            or
-    app_deploy_prepare_configs_paths is string                     or
-    app_deploy_prepare_configs_paths is not sequence               or
-    app_deploy_prepare_states is not mapping                       or
-    app_deploy_prepare_via is not string                           or
-    app_deploy_check_via is not string                             or
-    app_deploy_migrate_via is not string                           or
-    app_deploy_keep_releases_count is not number                   or
-    app_deploy_from_archive_http_username is not string            or
-    app_deploy_from_archive_http_password is not string            or
+    app_deploy_from is not string                                  or
     app_deploy_from_archive_checksum is not string                 or
+    app_deploy_from_archive_http_headers is not mapping            or
+    app_deploy_from_archive_http_password is not string            or
+    app_deploy_from_archive_http_username is not string            or
     app_deploy_from_archive_strip_components is not number         or
-    app_deploy_from_archive_http_get_params is not mapping         or
+    app_deploy_keep_releases_count is not number                   or
+    app_deploy_migrate_via is not string                           or
+    app_deploy_migrate_yii_become_user is not string               or
+    app_deploy_migrate_yii_calculate_pause is not boolean          or
+    app_deploy_migrate_yii_flush_what is not string                or
+    app_deploy_prepare_configs_paths is not sequence               or
+    app_deploy_prepare_configs_paths is string                     or
     app_deploy_prepare_http_proxy is not string                    or
     app_deploy_prepare_https_proxy is not string                   or
     app_deploy_prepare_npm_use_nvm is not boolean                  or
-    app_deploy_prepare_npm_use_nvm_nodejs_version is not string
+    app_deploy_prepare_npm_use_nvm_nodejs_version is not string    or
+    app_deploy_prepare_states is not mapping                       or
+    app_deploy_prepare_via is not string                           or
+    app_deploy_prepare_yii_disable_debug_files is not sequence     or
+    app_deploy_prepare_yii_disable_debug_files is string           or
+    app_deploy_releases_dirname is not string                      or
+    app_deploy_shared_dirname is not string                        or
+    app_deploy_shared_paths is not sequence                        or
+    app_deploy_shared_paths is string                              or
+    app_deploy_shared_via is not string                            or
+    app_deploy_to_dir is not string                                or
+    app_deploy_version is not string                               or
+    app_deploy_via is not string
 
 - name: Install 'python-apt' as dependency for checking mode
   apt:
@@ -155,6 +160,7 @@
 
 - name: Migrate application's databases via selected method
   include_tasks: "app_deploy_migrate_{{ app_deploy_migrate_via }}.yml"
+  run_once: yes
   when:
     - app_deploy_migrate_via != 'none'
   tags:
