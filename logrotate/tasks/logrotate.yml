@@ -26,10 +26,10 @@
 
 - name: Write configuration files
   template:
-    src: etc/logrotate.d/logrotate.conf.j2
-    dest: &logrotate_dest "/etc/logrotate.d/{{ item.key }}.conf"
+    src: etc/logrotate.d/logrotate.j2
+    dest: &logrotate_dest "/etc/logrotate.d/{{ item.key }}"
     validate: logrotate --debug %s
-  loop: "{{ logrotate_configs | dict2items}}"
+  loop: "{{ logrotate_configs | dict2items }}"
   loop_control:
     label: *logrotate_dest
   tags:
