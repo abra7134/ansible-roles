@@ -1,5 +1,5 @@
 ---
-- name: Remove 'www' pool
+- name: Remove 'www' php5.6-fpm pool
   file:
     path: /etc/php/5.6/fpm/pool.d/www.conf
     state: absent
