@@ -1,0 +1,9 @@
+---
+- import_tasks: app_deploy_prepare_composer.yml
+
+- name: "prepare_yii : Disable 'debug' and 'dev' environments in files"
+  replace:
+    regexp: "^defined\\('YII_(DEBUG|ENV)'\\)"
+    replace: "//defined('YII_\\1')"
+    dest: "{{ _app_deploy_version_dir }}/{{ item }}"
+  loop: "{{ app_deploy_prepare_yii_disable_debug_files }}"

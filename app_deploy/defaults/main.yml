@@ -59,8 +59,19 @@ app_deploy_from_archive_strip_components: 1
 app_deploy_prepare_http_proxy: ""
 app_deploy_prepare_https_proxy: ""
 
+# Run 'config:cache' and/or 'route:cache' commands during a prepare
+app_deploy_prepare_laravel_optimize_configuration_loading: no
+app_deploy_prepare_laravel_optimize_route_loading: yes
+
 # Run npm commands via nvm manager
 app_deploy_prepare_npm_use_nvm: yes
 
 # Override a version of NodeJS specified at .nvmrc file
 app_deploy_prepare_npm_use_nvm_nodejs_version: ""
+
+# Comment out next lines in specified files
+## defined('YII_DEBUG') or define('YII_DEBUG', true);
+## defined('YII_ENV') or define('YII_ENV', 'dev');
+app_deploy_prepare_yii_disable_debug_files:
+  - yii
+  - web/index.php

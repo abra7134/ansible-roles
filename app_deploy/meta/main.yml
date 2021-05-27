@@ -1,5 +1,8 @@
 ---
 dependencies:
+  - role: composer
+    when:
+      - app_deploy_prepare_via in ['yii', 'laravel']
   - role: nvm
     when:
       - app_deploy_prepare_via == 'npm'

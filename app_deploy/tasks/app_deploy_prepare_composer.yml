@@ -1,0 +1,65 @@
+---
+- name: "prepare_composer : Read a 'composer.json' file to determine the needed PHP version"
+  command:
+    cmd: >-
+      cat composer.json
+    chdir: "{{ _app_deploy_version_dir }}"
+  register: __result_composer_json
+
+- name: "prepare_composer : Parse 'json'"
+  set_fact:
+    __composer_json: "{{ __result_composer_json.stdout | from_json }}"
+
+- name: "prepare_composer : Check a 'require.php' parameter from 'composer.json' file"
+  fail:
+    msg: |
+      Can't determining a needed PHP version from composer.json
+      Use a format with tilde, for example: ~5.6.0
+  when: >
+    not 'require' in __composer_json or
+    not 'php' in __composer_json.require or
+    not __composer_json.require.php is search('^~\d+\.\d+\.\d+$')
+
+- name: "prepare_composer : Set 'app_php_version' variable"
+  set_fact:
+    app_php_version: "{{ __composer_json.require.php | regex_replace('^~(\\d+\\.\\d+)\\.\\d+$', '\\1') }}"
+
+- name: "prepare_composer : Verify the correct version of required PHP"
+  fail:
+    msg: |
+      PHP versions are allowed: 5.6, 7.1, 7.2. But not {{ app_php_version }}, please correct.
+  when:
+    - app_php_version not in ['5.6', '7.1', '7.2']
+
+- name: "prepare_composer : Write a '.profile_php*' file"
+  file:
+    path: "{{ _app_deploy_version_dir }}/.profile_php{{ app_php_version }}"
+    state: touch
+
+- name: "prepare_composer : Set right php version via 'alternatives'"
+  alternatives:
+    name: "{{ item }}"
+    path: "/usr/bin/{{ item }}{{ app_php_version }}"
+  loop:
+    - php
+    - phar
+    - phar.phar
+
+- name: "prepare_composer : Install fxp/composer-asset-plugin:^1.2.0 (required by yii)"
+  composer:
+    command: require
+    global_command: yes
+    arguments: fxp/composer-asset-plugin:^1.2.0
+  environment:
+    http_proxy: "{{ app_deploy_prepare_http_proxy }}"
+    https_proxy: "{{ app_deploy_prepare_https_proxy }}"
+  when:
+    - app_deploy_prepare_via == 'yii'
+
+- name: "prepare_composer : Install application dependencies via 'composer'"
+  composer:
+    command: install
+    working_dir: "{{ _app_deploy_version_dir }}"
+  environment:
+    http_proxy: "{{ app_deploy_prepare_http_proxy }}"
+    https_proxy: "{{ app_deploy_prepare_https_proxy }}"

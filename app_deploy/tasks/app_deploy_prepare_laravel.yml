@@ -1,0 +1,20 @@
+---
+- import_tasks: app_deploy_prepare_composer.yml
+
+- name: "prepare_laravel : Optimizing configuration loading (config:cache)"
+  command:
+    cmd: >-
+      php artisan config:cache
+    chdir: "{{ _app_deploy_version_dir }}"
+    creates: bootstrap/cache/config.php
+  when:
+    - app_deploy_prepare_laravel_optimize_configuration_loading
+
+- name: "prepare_laravel : Optimizing route loading (route:cache)"
+  command:
+    cmd: >-
+      php artisan route:cache
+    chdir: "{{ _app_deploy_version_dir }}"
+    creates: bootstrap/cache/routes.php
+  when:
+    - app_deploy_prepare_laravel_optimize_route_loading
