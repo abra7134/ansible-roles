@@ -29,7 +29,7 @@
     name: "{{ ['php5.6'] | product(php56_fpm_components + ['cli', 'fpm']) | map('join', '-') | list }}"
     state: latest
   notify:
-    - Remove 'www' php5.6-fpm pool
+    - Remove 'www' pool (php56_fpm)
 
 - import_tasks: php56_fpm_systemd.yml
   tags:

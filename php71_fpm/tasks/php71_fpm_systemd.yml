@@ -11,4 +11,4 @@
       Restart=always
     dest: /etc/systemd/system/php7.1-fpm.service.d/restart.conf
   notify:
-    - Reload 'systemd' daemon
+    - Reload 'systemd' daemon (php71_fpm)

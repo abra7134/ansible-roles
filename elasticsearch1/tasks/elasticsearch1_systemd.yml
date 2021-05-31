@@ -13,5 +13,5 @@
   loop:
     - /etc/systemd/system/elasticsearch.service.d/limitmemlock.conf
   notify:
-    - Reload 'systemd' daemon
+    - Reload 'systemd' daemon (elasticsearch1)
     - Restart 'elasticsearch' service

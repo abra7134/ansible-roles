@@ -68,7 +68,7 @@
     - /etc/default/minio
     - /etc/systemd/system/minio.service
   notify:
-    - Reload 'systemd' daemon
+    - Reload 'systemd' daemon (minio)
     - Restart 'minio' service
   tags:
     - minio_config

@@ -1,12 +1,12 @@
 ---
-- name: Remove 'www' php5.6-fpm pool
+- name: Remove 'www' pool (php56_fpm)
   file:
     path: /etc/php/5.6/fpm/pool.d/www.conf
     state: absent
   when:
     - php56_fpm_pools["www"] == None
 
-- name: Reload 'systemd' daemon
+- name: Reload 'systemd' daemon (php56_fpm)
   systemd:
     daemon_reload: yes
 

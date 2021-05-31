@@ -40,7 +40,7 @@
       Restart=always
     dest: /etc/systemd/system/openvpn@.service.d/restart_always.conf
   notify:
-    - Reload 'systemd' daemon
+    - Reload 'systemd' daemon (openvpn)
 
 - block:
   - name: Write tunnels configurations

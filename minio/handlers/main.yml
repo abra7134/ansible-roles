@@ -1,5 +1,5 @@
 ---
-- name: Reload 'systemd' daemon
+- name: Reload 'systemd' daemon (minio)
   systemd:
     daemon-reload: yes
 

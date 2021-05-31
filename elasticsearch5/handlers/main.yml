@@ -1,5 +1,5 @@
 ---
-- name: Reload 'systemd' daemon
+- name: Reload 'systemd' daemon (elasticsearch5)
   systemd:
     daemon_reload: yes
 

@@ -29,7 +29,7 @@
     name: "{{ ['php7.1'] | product(php71_fpm_components + ['cli', 'fpm']) | map('join', '-') | list }}"
     state: latest
   notify:
-    - Remove 'www' php7.1-fpm pool
+    - Remove 'www' pool (php71_fpm)
 
 - import_tasks: php71_fpm_systemd.yml
   tags:

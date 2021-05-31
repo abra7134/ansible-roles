@@ -1,12 +1,12 @@
 ---
-- name: Remove 'www' php7.1-fpm pool
+- name: Remove 'www' pool (php71_fpm)
   file:
     path: /etc/php/7.1/fpm/pool.d/www.conf
     state: absent
   when:
     - php71_fpm_pools["www"] == None
 
-- name: Reload 'systemd' daemon
+- name: Reload 'systemd' daemon (php71_fpm)
   systemd:
     daemon_reload: yes
 

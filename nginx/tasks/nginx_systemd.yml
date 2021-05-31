@@ -11,5 +11,5 @@
       Restart=always
     dest: /etc/systemd/system/nginx.service.d/restart.conf
   notify:
-    - Reload 'systemd' daemon
+    - Reload 'systemd' daemon (nginx)
 
