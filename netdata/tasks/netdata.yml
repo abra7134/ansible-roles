@@ -85,11 +85,13 @@
 - name: Write configuration files
   template:
     src: "etc/netdata/{{ item.key }}.conf.j2"
-    dest: "{{ _netdata_dir }}/etc/netdata/{{ item.key }}.conf"
+    dest: &config_dest "{{ _netdata_dir }}/etc/netdata/{{ item.key }}.conf"
     owner: netdata
     group: netdata
     mode: 0644
-  with_dict: "{{ netdata_configs }}"
+  loop: "{{ netdata_configs | dict2items }}"
+  loop_control:
+    label: *config_dest
   notify:
     - Restart 'netdata' service
   tags:
