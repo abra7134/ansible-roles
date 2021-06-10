@@ -82,7 +82,7 @@
     src: etc/nginx/conf.d/sites/site.conf.j2
     dest: &site_config_path "/etc/nginx/conf.d/sites/{{ item.key }}.conf"
     mode: "{{ item.value.mode | default(0644) }}"
-  loop: "{{ nginx_sites | dict2items }}"
+  loop: "{{ nginx_sites_configs | dict2items }}"
   loop_control:
     label: *site_config_path
   notify:

@@ -35,7 +35,6 @@ nginx_configs:
 # Sites configuration
 # for templates/nginx_site.conf.j2
 nginx_sites_configs: {}
-# example
   # default:
     # - listen 80
     # - server_name localhost
