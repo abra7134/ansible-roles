@@ -35,7 +35,7 @@ debian_network_interfaces: {}
 debian_packages: []
 
 # Use persistent storage for systemd's journal
-debian_systemd_journal_persistent: yes
+debian_systemd_journal_persistent: no
 
 # The dictionary with system users definitions
 debian_users: {}
