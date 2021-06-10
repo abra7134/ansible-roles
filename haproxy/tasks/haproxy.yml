@@ -13,7 +13,7 @@
 
 - name: Add a repository key
   apt_key:
-    url: "{{ _haproxy_apt_key_url }}"
+    url: "{{ _haproxy_repository_key_url }}"
 
 - name: Add a repository
   apt_repository:
