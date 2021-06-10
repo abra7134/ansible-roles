@@ -66,3 +66,7 @@ gearman_config:
   # Tokyocabinet
   #libtokyocabinet-file:               # File name of the database. [see: man tcadb, tcadbopen() for name guidelines]
   #libtokyocabinet-optimize: true      # Optimize database on open. [default=true]
+
+# Control use or not the tmpfs for storing database (sqlite3 file for example)
+gearman_use_tmpfs_for:
+  - /var/lib/gearman

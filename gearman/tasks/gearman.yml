@@ -3,7 +3,9 @@
   fail:
     msg: Invalid a variables type or value, please check
   when: >-
-    gearman_config is not mapping
+    gearman_config is not mapping            or
+    gearman_use_tmpfs_for is string          or
+    gearman_use_tmpfs_for is not sequence
 
 - name: Install 'python-apt' as dependency for checking mode
   apt:
@@ -26,6 +28,17 @@
       - gearman-job-server
       - gearman-tools
     state: latest
+
+- name: Mount 'tmpfs' on directories
+  mount:
+    fstype: tmpfs
+    opts: mode=0755,uid=gearman,gid=gearman
+    path: "{{ item }}"
+    src: tmpfs
+    state: mounted
+  loop: "{{ gearman_use_tmpfs_for }}"
+  notify:
+    - Restart 'gearman-job-server' service
 
 - name: Write configuration files
   template:
