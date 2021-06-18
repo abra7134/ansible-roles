@@ -16,6 +16,8 @@ dependencies:
           fs.file-max: 98000
           kernel.pid_max: 64000
           kernel.threads-max: 64000
+    when:
+      - "'server' in percona_mongodb_components"
 
 galaxy_info:
   author: Maksim Lekomtsev <lekomtsev@unix-mastery.ru>
