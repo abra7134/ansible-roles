@@ -74,8 +74,8 @@ make_operation {{ backup_params.type }} \
   "{{ database }}" \
   "" \
 {% elif database is mapping %}
-  "{{ database.keys()[0] }}" \
-  "{{ database.values()[0] }}" \
+  "{{ database.keys() | first }}" \
+  "{{ database.values() | first }}" \
 {% endif %}
   "{{ backup_params.options.query_filter | default('') }}"
 {% endfor %}
