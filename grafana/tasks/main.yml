@@ -1,0 +1,4 @@
+---
+- import_tasks: grafana.yml
+  tags:
+    - grafana

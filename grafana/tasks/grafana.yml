@@ -1,0 +1,38 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    grafana_config is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Fetch a package
+  get_url:
+    checksum: "{{ _grafana_deb_checksum }}"
+    url: "{{ _grafana_deb_url }}"
+    dest: "{{ _grafana_deb_path }}"
+
+- name: Install a package
+  apt:
+    deb: "{{ _grafana_deb_path }}"
+    dpkg_options: force-confdef,force-confold,skip-same-version
+    state: present
+  notify:
+    - Restart 'grafana' service
+
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0644
+  loop:
+    - /etc/grafana/grafana.ini
+  notify:
+    - Restart 'grafana' service
+  tags:
+    - grafana_config

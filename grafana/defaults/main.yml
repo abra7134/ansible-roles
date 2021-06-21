@@ -1,0 +1,8 @@
+---
+# The 'grafana' configuration override
+grafana_config: {}
+#  # default settings can see in ../dist/grafana.ini-VERSION
+#  app_mode: production
+#  server:
+#    # The ip address to bind to, empty will bind to all interfaces
+#    http_addr: "localhost"

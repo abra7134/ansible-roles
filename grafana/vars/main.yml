@@ -1,0 +1,9 @@
+---
+# The 'grafana' version to be installed
+_grafana_version: 4.2.0
+
+# The 'grafana' deb-package URL download from and his checksum
+_grafana_deb_url: "https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_{{ _grafana_version }}_amd64.deb"
+_grafana_deb_checksum: sha1:adf7d1c2dbff06672632408d0571e00eb510c512
+# The 'grafana' deb-package download to
+_grafana_deb_path: "/opt/{{ _grafana_deb_url | basename }}"

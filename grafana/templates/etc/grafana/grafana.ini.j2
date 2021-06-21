@@ -1,0 +1,18 @@
+{{ ansible_managed | comment }}
+
+# Grafana Configuration override
+
+{% if grafana_config.app_mode is defined and grafana_config.app_mode != None %}
+app_mode = {{ grafana_config.app_mode }}
+
+{% endif %}
+{% for section, params in grafana_config.items() %}
+{% if params is mapping %}
+## {{ section|title }} section override
+[{{ section }}]
+{% for param, value in params.items() %}
+{{ param }} = {{ value }}
+{% endfor %}
+
+{% endif %}
+{% endfor %}
