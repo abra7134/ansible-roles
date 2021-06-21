@@ -1,4 +1,4 @@
- ---
+---
 # The 'gearman' main configuration
 gearman_config:
   # Number of backlog connections for listen.
