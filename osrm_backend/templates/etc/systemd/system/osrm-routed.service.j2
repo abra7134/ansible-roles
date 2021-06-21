@@ -25,7 +25,7 @@ ExecStart={{ _osrm_backend_dir }}/osrm-routed \
   --max-alternatives=${OSRM_ROUTED_MAX_ALTERNATIVES} \
   --max-matching-radius=${OSRM_ROUTED_MAX_MATCHING_RADIUS} \
   ${OSRM_ROUTED_MAP_FILE}
-SyslogIdentifier=%p
+SyslogIdentifier=%p-{{ _osrm_backend_version }}
 KillMode=control-group
 Restart=on-failure
 
