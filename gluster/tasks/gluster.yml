@@ -30,4 +30,4 @@
 
 - name: Install packages
   apt:
-    name: "{{ ['glusterfs-client'] + (['glusterfs-server'] if not gluster_client_only else [] }}"
+    name: "{{ ['glusterfs-client'] + (['glusterfs-server'] if not gluster_client_only else []) }}"
