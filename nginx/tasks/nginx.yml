@@ -53,10 +53,17 @@
 - name: Create directories
   file:
     dest: "{{ item }}"
+    mode: "{{ item.startswith('/var/cache') | ternary(0700, 0755) }}"
+    owner: "{{ item.startswith('/var/cache') | ternary('nginx', 'root') }}"
     state: directory
   loop:
     - /etc/nginx/conf.d/sites
     - /etc/nginx/conf.d/snippets
+    - /var/cache/nginx/client_temp
+    - /var/cache/nginx/fastcgi_temp
+    - /var/cache/nginx/proxy_temp
+    - /var/cache/nginx/scgi_temp
+    - /var/cache/nginx/uwsgi_temp
     - /var/www/html
   tags:
     - nginx_config
