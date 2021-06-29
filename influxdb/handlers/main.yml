@@ -1,0 +1,11 @@
+---
+- name: Restart 'influxdb' service
+  service:
+    name: influxdb
+    state: restarted
+
+- name: Create 'admin' user
+  command: >-
+    /usr/bin/influx
+    -host {{ loc_ip }}
+    -execute "create user {{ influxdb_admin_user }} with password '{{ influxdb_admin_password }}' with all privileges"

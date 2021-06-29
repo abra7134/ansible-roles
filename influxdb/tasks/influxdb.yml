@@ -1,0 +1,89 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    influxdb_dbs is string                   or
+    influxdb_dbs is not sequence             or
+    influxdb_admin_user is not string        or
+    influxdb_admin_password is not string    or
+    influxdb_users is not mapping            or
+    influxdb_config is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Install dependencies for this role working
+  apt:
+    name:
+      - python-pip
+      - python-setuptools
+      - python-wheel
+    state: latest
+
+- name: Install 'influxdb' python package for this role working
+  pip:
+    name: influxdb
+    state: present
+
+- name: Fetch a package
+  get_url:
+    checksum: "{{ _influxdb_deb_checksum }}"
+    url: "{{ _influxdb_deb_url }}"
+    dest: "{{ _influxdb_deb_path }}"
+
+- name: Install the package
+  apt:
+    deb: "{{ _influxdb_deb_path }}"
+    dpkg_options: force-confdef,force-confold,skip-same-version
+    state: present
+  notify:
+    - Restart 'influxdb' service
+    # And create admin user in influxdb if is first installation
+    - Create 'admin' user
+
+- meta: flush_handlers
+
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+    mode: 0644
+  loop:
+    - /etc/influxdb/influxdb.conf
+  notify:
+    - Restart 'influxdb' service
+  tags:
+    - influxdb_config
+
+- name: Manage databases
+  influxdb_database:
+    database_name: "{{ item }}"
+    hostname: &hostname "{{ (influxdb_config['http']['bind-address'] | default('*:8086') | replace('*', '127.0.0.1')).split(':')[0] }}"
+    login_password: &login_password "{{ influxdb_admin_password }}"
+    login_username: &login_username "{{ influxdb_admin_user }}"
+    port: &port "{{ (influxdb_config['http']['bind-address'] | default('*:8086') | replace('*', '127.0.0.1')).split(':')[1] | int }}"
+    state: present
+  loop: "{{ influxdb_dbs }}"
+  tags:
+    - influxdb_dbs
+
+- name: Manage users
+  influxdb_user:
+    hostname: *hostname
+    login_password: *login_password
+    login_username: *login_username
+    port: *port
+    state: present
+    user_name: &user_name "{{ item.key }}"
+    user_password: "{{ item.value.password }}"
+  loop: "{{ influxdb_users | dict2items }}"
+  loop_control:
+    label: *user_name
+  tags:
+    - influxdb_users
+
+- meta: flush_handlers

@@ -1,0 +1,9 @@
+---
+# The 'influxdb' version to be installed
+_influxdb_version: 1.1.5
+
+# The 'influxdb' debian-package URL download from and his checksum
+_influxdb_deb_url: "https://dl.influxdata.com/influxdb/releases/influxdb_{{ _influxdb_version }}_amd64.deb"
+_influxdb_deb_checksum: sha1:69a991752a70506fbfcc8b3f15275bc092752d09
+# The 'influxdb' deb-package download to
+_influxdb_deb_path: "/opt/{{ _influxdb_deb_url | basename }}"

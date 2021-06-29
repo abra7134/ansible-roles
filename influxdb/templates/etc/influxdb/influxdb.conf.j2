@@ -1,0 +1,35 @@
+{{ ansible_managed | comment }}
+
+### Welcome to the InfluxDB configuration file.
+# Run influxd -config for view other settings
+
+{% macro write_param(param, value) %}
+{% if value is sequence and value is not string %}
+{{ param }} = [ "{{ value | join('", "') }}" ]
+{% elif value is boolean %}
+{{ param }} = {{ value | lower }}
+{% elif value is number %}
+{{ param }} = {{ value }}
+{% else %}
+{{ param }} = "{{ value }}"
+{% endif %}
+{% endmacro -%}
+
+{% if influxdb_config is mapping %}
+{% for param, value in influxdb_config.items() %}
+{% if value is not mapping %}
+{{ write_param(param, value) -}}
+{% endif %}
+{% endfor %}
+
+{% for section, params in influxdb_config.items() %}
+{% if params is mapping %}
+[{{ section }}]
+{% for param, value in params.items() %}
+  {{ write_param(param, value) -}}
+{% endfor %}
+
+{% endif %}
+{% endfor %}
+
+{% endif %}

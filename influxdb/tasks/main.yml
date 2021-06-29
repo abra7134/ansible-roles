@@ -1,0 +1,4 @@
+---
+- import_tasks: influxdb.yml
+  tags:
+    - influxdb
