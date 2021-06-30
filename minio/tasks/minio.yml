@@ -75,9 +75,9 @@
 
 - meta: flush_handlers
 
-- name: Pause 5 seconds for starting
+- name: Pause 10 seconds for starting
   pause:
-    seconds: 5
+    seconds: 10
 
 - name: Setup access for client
   command:
