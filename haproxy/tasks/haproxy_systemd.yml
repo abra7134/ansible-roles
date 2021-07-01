@@ -1,0 +1,14 @@
+- name: "systemd : Create a directory"
+  file:
+    dest: /etc/systemd/system/haproxy.service.d
+    state: directory
+
+- name: "systemd : Set a 'syslogidentifier' for 'haproxy' service"
+  copy:
+    content: |
+      [Service]
+      SyslogIdentifier=haproxy-{{ _haproxy_major_version }}
+    dest: /etc/systemd/system/haproxy.service.d/syslogidentifier.conf
+  notify:
+    - Reload 'systemd' daemon (haproxy)
+    - Restart 'haproxy' service

@@ -35,14 +35,9 @@
       - socat
     state: latest
 
-- name: Create directories
-  file:
-    dest: "{{ item }}"
-    state: directory
-  loop:
-    - /etc/systemd/system/haproxy.service.d
+- import_tasks: haproxy_systemd.yml
   tags:
-    - haproxy_config
+    - haproxy_systemd
 
 - name: Write configuration files
   template:
@@ -50,7 +45,6 @@
     dest: "{{ item }}"
   loop:
     - /etc/haproxy/haproxy.cfg
-    - /etc/systemd/system/haproxy.service.d/syslogidentifier.conf
   notify:
     - Reload 'haproxy' service
   tags:
