@@ -1,0 +1,13 @@
+{{ ansible_managed | comment }}
+
+{% for param, value in tinyproxy_config.items() %}
+{% if value is sequence and value is not string %}
+{% for subvalue in value %}
+{{ param }} {{ subvalue }}
+{% endfor %}
+{% elif value is boolean %}
+{{ param }} {{ value | ternary("Yes", "No") }}
+{% else %}
+{{ param }} {{ value | default('') }}
+{% endif %}
+{% endfor %}

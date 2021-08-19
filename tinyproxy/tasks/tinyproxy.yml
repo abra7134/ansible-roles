@@ -1,0 +1,38 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    tinyproxy_config is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Pin the actual version
+  copy:
+    content: |
+      Package: tinyproxy
+      Pin: version {{ _tinyproxy_version }}-*
+      Pin-Priority: 1001
+    dest: /etc/apt/preferences.d/00tinyproxy
+
+- name: Install a package
+  apt:
+    name: tinyproxy
+    state: latest
+
+- name: Write a configuration file
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+  loop:
+    - /etc/tinyproxy/tinyproxy.conf
+  tags:
+    - tinyproxy_config
+  notify:
+    - Restart 'tinyproxy' service
+
+- meta: flush_handlers
