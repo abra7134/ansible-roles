@@ -1,0 +1,38 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    dnsmasq_config is not mapping
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Pin the actual version
+  copy:
+    content: |
+      Package: dnsmasq
+      Pin: version {{ _dnsmasq_version }}-*
+      Pin-Priority: 1001
+    dest: /etc/apt/preferences.d/00dnsmasq
+
+- name: Install a package
+  apt:
+    name: dnsmasq
+    state: latest
+
+- name: Write configuration files
+  template:
+    src: "{{ item.strip('/') }}.j2"
+    dest: "{{ item }}"
+  loop:
+    - /etc/dnsmasq.conf
+  notify:
+    - Restart 'dnsmasq' service
+  tags:
+    - dnsmasq_config
+
+- meta: flush_handlers

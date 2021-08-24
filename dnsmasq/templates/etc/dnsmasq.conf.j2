@@ -1,0 +1,11 @@
+{% for param_name, param_values in dnsmasq_config.items() %}
+{% if param_values is sequence and param_values is not string %}
+{% for param_value in param_values %}
+{{ param_name }}={{ param_value }}
+{% endfor %}
+{% elif param_values is boolean and param_values %}
+{{ param_name }}
+{% elif param_values is string or param_values is number %}
+{{ param_name }}={{ param_values }}
+{% endif %}
+{% endfor %}
