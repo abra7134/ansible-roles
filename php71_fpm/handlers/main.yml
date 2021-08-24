@@ -4,7 +4,8 @@
     path: /etc/php/7.1/fpm/pool.d/www.conf
     state: absent
   when:
-    - php71_fpm_pools["www"] == None
+    - php71_fpm_pools["www"] is defined
+    - php71_fpm_pools["www"] == None or php71_fpm_pools["www"] | count < 1
 
 - name: Reload 'systemd' daemon (php71_fpm)
   systemd:
