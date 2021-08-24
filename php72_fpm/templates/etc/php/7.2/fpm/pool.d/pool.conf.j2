@@ -6,16 +6,8 @@
 
 [{{ item.key }}]
 {% if item.value is mapping %}
-{# If pool's default settings is defined #}
-{% if php72_fpm_pools['default'] is mapping %}
-{# then merge with defined values #}
-{% set settings = php72_fpm_pools['default'] %}
-{% set        x = settings.update(item.value) %}
-{% else %}
-{# Else just use defined values #}
-{% set settings = item.value %}
-{% endif %}
-{% for param in settings|sort if settings[param] != None %}
+{% set settings = php72_fpm_pools_defaults | combine(item.value) %}
+{% for param in settings | sort if settings[param] != None %}
 {{ param }} = {{ settings[param] }}
 {% endfor %}
 {% endif %}
