@@ -11,19 +11,27 @@
     state: latest
   check_mode: no
 
+- name: Add a repository key
+  apt_key:
+    url: "{{ _openvpn_repository_key_url }}"
+
+- name: Add a repository
+  apt_repository:
+    repo: "deb {{ _openvpn_repository_url }} {{ ansible_facts.distribution_release }} main"
+    update_cache: yes
+
 - name: Pin the actual version
   copy:
     content: |
       Package: openvpn
-      Pin: version {{ _openvpn_version }}-*
+      Pin: version {{ _openvpn_major_version }}.*
       Pin-Priority: 1001
     dest: /etc/apt/preferences.d/00openvpn
     mode: 0644
 
-- name: Install packages
+- name: Install a package
   apt:
-    name:
-      - openvpn
+    name: openvpn
     state: latest
 
 - name: Create a directory
@@ -63,6 +71,8 @@
       - __openvpn_write_tunnel_configurations.results | selectattr('item', 'defined') | selectattr('item.key', 'equalto', item.key) | list | count > 0
       - __openvpn_write_tunnel_configurations.results | selectattr('item', 'defined') | selectattr('item.key', 'equalto', item.key) | map(attribute='changed') | first == True
     loop: "{{ openvpn_configs | dict2items }}"
+    loop_control:
+      label: "{{ item.key }}"
   tags:
     - openvpn_configs
 

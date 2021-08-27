@@ -1,14 +1,7 @@
 ---
-# The 'openvpn' version to be installed
-_openvpn_version: >-
-  {{ [ansible_facts.distribution_release | mandatory]
-     | map(
-         'extract',
-         {
-           'jessie': '2.3.4',
-           'stretch': '2.4.0',
-           'buster': '2.4.7'
-         }
-       )
-     | first
-  }}
+# The 'openvpn' major version to be installed
+_openvpn_major_version: 2.3
+
+# The 'openvpn' repository and key URLs
+_openvpn_repository_key_url: https://swupdate.openvpn.net/repos/repo-public.gpg
+_openvpn_repository_url: "http://build.openvpn.net/debian/openvpn/release/{{ _openvpn_major_version }}"
