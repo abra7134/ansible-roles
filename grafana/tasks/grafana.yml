@@ -36,3 +36,5 @@
     - Restart 'grafana' service
   tags:
     - grafana_config
+
+- meta: flush_handlers
