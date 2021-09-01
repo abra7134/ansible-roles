@@ -26,12 +26,16 @@ iface {{ iface_name }} inet static
        hwaddress {{ iface_params['mac'] }}
 {% endif %}
 {{ bridge_ports(iface_params) -}}
-{% if iface_params['routes'] is sequence and iface_params['routes'] is not string %}
-{% for iface_route in iface_params['routes'] %}
+{% if iface_params['routes'] is mapping %}
+{% for iface_routes_name, iface_routes in iface_params['routes'].items() %}
+{% if iface_routes is sequence and iface_routes is not string %}
+{% for iface_route in iface_routes %}
 {% if iface_route != None and iface_route != "" %}
 
        post-up ip route add {{ iface_route }} dev {{ iface_name }}
        pre-down ip route del {{ iface_route }} dev {{ iface_name }}
+{% endif %}
+{% endfor %}
 {% endif %}
 {% endfor %}
 {% endif %}

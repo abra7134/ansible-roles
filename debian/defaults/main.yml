@@ -22,8 +22,9 @@ debian_network_interfaces: {}
 #    netmask: 255.255.255.0
 #    gateway: 192.168.1.1
 #    mac: FF:FF:FF:FF:FF:FF # Optional
-#    routes: []             # The list with additional routes in 'ip route' format
-#      - 192.168.0.0/24 via 192.168.1.250
+#    routes:                # The dictionary with lists of additional routes in 'ip route' format
+#      office:
+#        - 192.168.0.0/24 via 192.168.1.250
 #    address6: a000:1234::1
 #    netmask6: 64
 #    gateway6: fe80::1
