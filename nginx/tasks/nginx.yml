@@ -92,6 +92,9 @@
   loop: "{{ nginx_sites_configs | dict2items }}"
   loop_control:
     label: *site_config_path
+  when:
+    - item.value is sequence and item.value is not string
+    - item.value | count > 1
   notify:
     - Reload 'nginx' service
   tags:
