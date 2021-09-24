@@ -11,10 +11,12 @@ influxdb_dbs: []
 # The dictionary with other users
 influxdb_users: {}
 #  user1:
+#    grants:
+#      - database: database1
+#        privilege: all
+#      - database: database2
+#        privilege: read
 #    password: xxx
-#    privileges:
-#      - all on database1
-#      - read on database2
 #  user2:
 #    password: xxx
 

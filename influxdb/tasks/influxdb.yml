@@ -73,6 +73,7 @@
 
 - name: Manage users
   influxdb_user:
+    grants: "{{ item.value.grants | default(omit) }}"
     hostname: *hostname
     login_password: *login_password
     login_username: *login_username
