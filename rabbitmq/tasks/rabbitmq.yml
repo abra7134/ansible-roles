@@ -46,6 +46,8 @@
     - /etc/rabbitmq/rabbitmq-env.conf
     - /etc/rabbitmq/rabbitmq.config
     - /var/lib/rabbitmq/.erlang.cookie
+  when:
+    - rabbitmq_cookie != "" or not item.endswith('.erlang.cookie')
   tags:
     - rabbitmq_config
   notify:
