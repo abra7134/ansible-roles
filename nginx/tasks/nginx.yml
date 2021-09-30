@@ -72,13 +72,16 @@
 - name: Write configuration files
   template:
     src: "{{ (item.value.type | default('other') == 'htpasswd') | ternary('etc/nginx/htpasswd.j2', 'etc/nginx/nginx.conf.j2') }}"
-    dest: &config_path "/etc/nginx/{{ item.value.path }}"
+    dest: "/etc/nginx/{{ item.value.path }}"
     mode: "{{ (item.value.type | default('other') == 'htpasswd') | ternary(0600, 0644) }}"
     owner: "{{ (item.value.type | default('other') == 'htpasswd') | ternary('nginx', omit) }}"
     group: "{{ (item.value.type | default('other') == 'htpasswd') | ternary('nginx', omit) }}"
   loop: "{{ nginx_configs | dict2items }}"
   loop_control:
-    label: *config_path
+    label: "{{ 'absent' if item.value.path is not defined else '/etc/nginx/%s' % item.value.path }}"
+  when:
+    - item.value is mapping
+    - item.value | count > 1
   notify:
     - Reload 'nginx' service
   tags:
