@@ -1,20 +1,16 @@
 ---
 - name: "current_symlink : Link current folder to new release via symlink"
-  # serial: 1 would be the proper solution here, but that can only be set on play level
-  # Upstream issue: https://github.com/ansible/ansible/issues/12170
+  throttle: 1
+  # Using 'shell' instead on 'file' module for properly working of pause
   shell:
     cmd: >-
-      ln --symbolic \
-        --force \
-        --no-target-directory \
-        "{{ _app_deploy_version_dir }}" \
-        "{{ _app_deploy_current_dir }}" \
-        ; \
+      ln --symbolic
+        --force
+        --no-target-directory
+        "{{ _app_deploy_version_dir }}"
+        "{{ _app_deploy_current_dir }}"
+      ;
       {% if play_hosts | count > 1 %}
       sleep 5
       {% endif %}
     warn: no
-  run_once: true
-  loop: "{{ play_hosts }}"
-  # Correct work with ip addresses only rather than hostnames :(
-  delegate_to: "{{ hostvars[item]['ansible_facts']['default_ipv4']['address'] }}"
