@@ -4,12 +4,12 @@
   # Using 'shell' instead on 'file' module for properly working of pause
   shell:
     cmd: >-
-      ln --symbolic
-        --force
-        --no-target-directory
-        "{{ _app_deploy_version_dir }}"
-        "{{ _app_deploy_current_dir }}"
-      ;
+      ln --symbolic \
+        --force \
+        --no-target-directory \
+        "{{ _app_deploy_version_dir }}" \
+        "{{ _app_deploy_current_dir }}" \
+      ; \
       {% if play_hosts | count > 1 %}
       sleep 5
       {% endif %}
