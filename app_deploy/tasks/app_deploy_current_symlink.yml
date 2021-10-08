@@ -9,7 +9,7 @@
         --no-target-directory \
         "{{ _app_deploy_version_dir }}" \
         "{{ _app_deploy_current_dir }}" \
-      ; \
+      ;
       {% if play_hosts | count > 1 %}
       sleep 5
       {% endif %}
