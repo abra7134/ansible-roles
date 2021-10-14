@@ -35,6 +35,8 @@
     creates: "{{ _osrm_backend_dir }}/README.md"
     src: "{{ _osrm_backend_binary_name }}"
     dest: "{{ _osrm_backend_dir }}"
+  when:
+    - not ansible_check_mode
 
 - name: Write configuration files
   template:
