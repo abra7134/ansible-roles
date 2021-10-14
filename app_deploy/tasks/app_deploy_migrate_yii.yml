@@ -78,9 +78,9 @@
       seconds: >-
         {% if app_deploy_migrate_yii_calculate_pause %}
         {% if __result_migrate_to is changed %}
-        {% set __migrate_to_s = (__result_migrate_to.end | datetime - __result_migrate_to.start | datetime).seconds %}
+        {% set __migrate_to_s = (__result_migrate_to.end | to_datetime - __result_migrate_to.start | datetime).seconds %}
         {% endif %}
-        {% set __migrate_up_s = (__result_migrate_up.end | datetime - __result_migrate_up.start | datetime).seconds %}
+        {% set __migrate_up_s = (__result_migrate_up.end | to_datetime - __result_migrate_up.start | datetime).seconds %}
         {{ __migrate_to_s | default(0) + __migrate_up_s }}
         {% else %}
         3
