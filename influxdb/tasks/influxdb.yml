@@ -23,11 +23,14 @@
       - python-setuptools
       - python-wheel
     state: latest
+  check_mode: no
 
-- name: Install 'influxdb' python package for this role working
+- name: Install python dependencies for this role working
   pip:
-    name: influxdb
+    name:
+      - influxdb
     state: present
+  check_mode: no
 
 - name: Fetch a package
   get_url:
