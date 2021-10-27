@@ -30,6 +30,7 @@
     checksum: "{{ _backups_rclone_deb_checksum }}"
     url: "{{ _backups_rclone_deb_url }}"
     dest: "{{ _backups_rclone_deb_path }}"
+  check_mode: no
 
 - name: Install packages
   apt:
