@@ -21,6 +21,7 @@
   loop: "{{ percona_mongodb_components }}"
   loop_control:
     label: "{{ _percona_mongodb_deb_path | basename }}"
+  check_mode: no
   when:
     - _percona_mongodb_deb_checksums[item] is defined
 
