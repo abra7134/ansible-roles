@@ -26,6 +26,7 @@
   loop: "{{ _minio_binaries_checksums | dict2items }}"
   loop_control:
     label: "{{ _minio_binaries_path | basename }}"
+  check_mode: no
 
 - name: Create binaries symlinks to '/usr/local/bin'
   file:
