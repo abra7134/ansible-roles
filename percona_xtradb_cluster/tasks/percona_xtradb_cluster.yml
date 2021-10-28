@@ -22,6 +22,7 @@
   loop: "{{ _percona_xtradb_cluster_deb_checksums | dict2items }}"
   loop_control:
     label: "{{ _percona_xtradb_cluster_deb_path | basename }}"
+  check_mode: no
 
 - name: Install dependencies
   apt:
