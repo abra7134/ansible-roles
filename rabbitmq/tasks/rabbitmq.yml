@@ -19,6 +19,7 @@
     checksum: "{{ _rabbitmq_deb_checksum }}"
     url: "{{ _rabbitmq_deb_url }}"
     dest: "{{ _rabbitmq_deb_path }}"
+  check_mode: no
 
 - name: Install packages
   apt:
