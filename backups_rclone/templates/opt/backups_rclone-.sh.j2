@@ -14,8 +14,8 @@ source "${0/-*.sh/.inc.sh}"
 backup_name="{{ backup_name }}"
 backup_type="{{ backup_params.type }}"
 backup_subdir="${DEFAULT_BACKUPS_DIR}/${backup_name}"
-backup_local_age_days={{ backup_params.local_age_days | default(backups_rclone_local_age_days) }}
-backup_remote_age_days={{ backup_params.remote_age_days | default(backups_rclone_remote_age_days) }}
+backup_local_age_days={{ backup_params.local_age_days | default(backups_rclone_local_age_days, true) }}
+backup_remote_age_days={{ backup_params.remote_age_days | default(backups_rclone_remote_age_days, true) }}
 backup_remote_cleanup="{{ backup_params.remote_cleanup | default('') }}"
 backup_rclone_remote="{{ backup_params.remote | default('%s%s/' % (backups_rclone_default_remote, backup_name)) }}"
 backup_pre_command="{{ backup_params.pre_command | default('') }}"
