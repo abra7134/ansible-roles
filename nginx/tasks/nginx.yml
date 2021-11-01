@@ -39,6 +39,8 @@
     state: latest
   notify:
     - Delete 'default' site
+  when:
+    - not ansible_check_mode
 
 - import_tasks: nginx_systemd.yml
   tags:
