@@ -2,7 +2,7 @@
 # Application URL, deploy from (via selected method and version)
 app_deploy_from: ""
 app_deploy_via: archive
-app_deploy_version: "{{ ansible_date_time.iso8601 }}"
+app_deploy_version: "{{ ansible_facts.date_time.iso8601 }}"
 # Deploy to (application's home directory)
 app_deploy_to_dir: /opt/my-app
 

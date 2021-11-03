@@ -4,7 +4,7 @@
     path: "{{ _app_deploy_version_dir }}"
     state: directory
 
-- name: "from_archive: Get the name of archive"
+- name: "from_archive : Get the name of archive"
   set_fact:
     _app_deploy_to: "{{ app_deploy_from | urlsplit('path') | basename }}"
 
