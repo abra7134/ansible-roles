@@ -1,0 +1,7 @@
+---
+- name: Restart 'nmon' service
+  systemd:
+    daemon_reload: yes
+    enabled: yes
+    name: nmon
+    state: restarted

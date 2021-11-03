@@ -1,0 +1,63 @@
+---
+- name: Checking variables types and values
+  fail:
+    msg: Invalid a variables type or value, please check
+  when: >-
+    nmon_options is not string
+
+- name: Install 'python-apt' as dependency for checking mode
+  apt:
+    name: python-apt
+    state: latest
+  check_mode: no
+
+- name: Install dependencies
+  apt:
+    name:
+      - ksh
+    state: latest
+
+- name: Fetch archives
+  get_url:
+    checksum: "{{ item.checksum }}"
+    dest: &dest "{{ item.dest }}"
+    url: "{{ item.url }}"
+  loop:
+    - "checksum": "{{ _nmon_archive_checksum }}"
+      "dest": "{{ _nmon_archive_path }}"
+      "url": "{{ _nmon_archive_url }}"
+    - "checksum": "{{ _nmonchart_archive_checksum }}"
+      "dest": "{{ _nmonchart_archive_path }}"
+      "url": "{{_nmonchart_archive_url }}"
+  loop_control:
+    label: *dest
+  check_mode: no
+
+- name: Unarchive binaries
+  unarchive:
+    creates: "{{ item.dest }}"
+    dest: "{{ item.dest | dirname }}"
+    extra_opts: "{{ item.only }}"
+    remote_src: yes
+    src: &src "{{ item.src }}"
+  loop:
+    - "src": "{{ _nmon_archive_path }}"
+      "dest": "{{ _nmon_path }}"
+      "only": "{{ _nmon_path | basename }}"
+    - "src": "{{ _nmonchart_archive_path }}"
+      "dest": "{{ _nmonchart_path }}"
+      "only": "./{{ _nmonchart_path | basename }}"
+  loop_control:
+    label: *src
+
+- name: Write configuration files
+  template:
+    dest: "{{ item }}"
+    src: "{{ item.strip('/') }}.j2"
+  loop:
+    - /etc/default/nmon
+    - /etc/systemd/system/nmon.service
+  notify:
+    - Restart 'nmon' service
+
+- meta: flush_handlers

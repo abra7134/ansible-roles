@@ -1,0 +1,15 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=nmon is short for Nigel's performance Monitor for Linux on POWER, x86, x86_64, Mainframe & now ARM (Raspberry Pi)
+Documentation=http://nmon.sourceforge.net/pmwiki.php
+
+[Service]
+Type=forking
+EnvironmentFile=-/etc/default/nmon
+ExecStart={{ _nmon_path }} $NMON_OPTIONS
+KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,22 @@
+# ---
+# The 'nmon' version to be installed
+_nmon_version: 16m
+
+# The 'nmon' archive source URL, them checksum, and path to download to
+_nmon_archive_url: "https://sourceforge.net/projects/nmon/files/nmon{{ _nmon_version }}_helpsystems.tar.gz"
+_nmon_archive_checksum: "sha1:27be11182449010c51b2520717127210f93a73f9"
+_nmon_archive_path: "/opt/{{ _nmon_archive_url | basename }}"
+
+# The 'nmon' destination path to unpack to
+_nmon_path: "/opt/nmon_x86_64_{{ ansible_facts.distribution | lower }}{{ '%.2d' % ansible_facts.distribution_major_version | int }}"
+
+# The 'nmonchart' version to be installed
+_nmonchart_version: 40
+
+# The 'nmonchart' archive source URL, them checksum, and path to download to
+_nmonchart_archive_url: "https://sourceforge.net/projects/nmon/files/nmonchart{{ _nmonchart_version }}.tar"
+_nmonchart_archive_checksum: "sha1:4b7478f020ed9bc16fb3b0977d6390bc79b2737e"
+_nmonchart_archive_path: "/opt/{{ _nmonchart_archive_url | basename }}"
+
+# The 'nmonchart' destination path to unpack to
+_nmonchart_path: "/opt/nmonchart"

@@ -1,0 +1,45 @@
+---
+# Data-Collect-Mode = spreadsheet format (i.e. comma separated values)
+#   Note: Use only one of f, F, R, x, X or z to switch on Data Collection mode
+#   Note: Make it the first argument then use other options to modify the defaults
+#   Note: Don't collect data that you don't want - it just makes the files too large
+#   Note: Too many snapshots = too much data and crashes Analyser and other tools
+#   Note: 500 to 800 snapshots make a good graph on a normal size screen
+#   Recommended normal minimal options: snapshots every 2 minutes all day:
+#     Simple capture:      nmon -f  -s 120 -c 720
+#     With Top Procs:      nmon -fT -s 120 -c 720
+#     Set the directory:   nmon -fT -s 120 -c 720 -m /home/nag/nmon
+#     Capture a busy hour: nmon -fT -s   5 -c 720 -m /home/nag/nmon
+#
+# For Data-Collect-Mode Options
+#   -f            spreadsheet output format [note: default -s300 -c288]
+#        output file is <hostname>_YYYYMMDD_HHMM.nmon
+#   -F <filename> same as -f but user supplied filename
+#        Not recommended as the default file name is perfect
+#   The other options in alphabetical order:
+#   -a            Include Accelerator GPU stats
+#   -b            Online only: for black and white mode (switch off colour)
+#   -c <number>   The number of snapshots before nmon stops
+#   -d <disks>    To set the maximum number of disks [default 256]
+#                 Ignores disks if the systems has 100's of disk or the config is odd!
+#   -D            Use with -g to add the Disk Wait/Service Time & in-flight stats
+#   -f and -F     See above
+#   -g <filename> User Defined Disk Groups (see above) - Data Capture: Generates  BBBG & DG lines
+#   -g auto       See above but makes the file "auto" for you of just the disks like sda etc.
+#   -h            This help output
+#   -I <percent>  Set the ignore process & disks busy threshold (default 0.1%)
+#                 Don't save or show proc/disk using less than this percent
+#   -l <dpl>      Disks per line in data capture to avoid spreadsheet width issues. Default 150. EMC=64.
+#   -m <directory> nmon changes to this directory before saving to file
+#                 Useful when starting nmon via cron
+#   -M    Adds MHz stats for each CPU thread. Some POWER8 model CPU cores can be different frequencies
+#   -N            Include NFS Network File System for V2, V3 and V4
+#   -p            nmon outputs the PID when it starts. Useful in scripts to capture the PID for a later safe stop.
+#   -r <runname>  Use in a benchmark to record the run details for later analysis [default hostname]
+#   -R      Old rrdtool format used by some - may be removed in the future. If you use this email Nigel
+#   -s <seconds>  Time between snap shots - with "-c count" decides duration of the data capture
+#   -t            Include Top Processes in the output
+#   -T            As -t plus it saves command line arguments in UARG section
+#   -U            Include the Linux 10 CPU utilisation stats (CPUUTIL lines in the file)
+#   -V            Print nmon version & exit immediately
+nmon_options: -fT -s 30 -c 2880 -m /tmp
